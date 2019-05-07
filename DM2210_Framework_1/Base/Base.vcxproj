@@ -21,12 +21,10 @@
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\Mesh.cpp" />
     <ClCompile Include="Source\MeshBuilder.cpp" />
-    <ClCompile Include="Source\SceneLight.cpp" />
-    <ClCompile Include="Source\SceneLight2.cpp" />
-    <ClCompile Include="Source\SceneSkybox.cpp" />
     <ClCompile Include="Source\SceneText.cpp" />
     <ClCompile Include="Source\shader.cpp" />
     <ClCompile Include="Source\Utility.cpp" />
+    <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Application.h" />
@@ -42,18 +40,31 @@
     <ClInclude Include="Source\Mesh.h" />
     <ClInclude Include="Source\MeshBuilder.h" />
     <ClInclude Include="Source\Scene.h" />
-    <ClInclude Include="Source\Scene1.h" />
-    <ClInclude Include="Source\Scene2.h" />
-    <ClInclude Include="Source\Scene3.h" />
-    <ClInclude Include="Source\Scene4.h" />
-    <ClInclude Include="Source\Scene5.h" />
-    <ClInclude Include="Source\SceneLight.h" />
-    <ClInclude Include="Source\SceneLight2.h" />
-    <ClInclude Include="Source\SceneSkybox.h" />
     <ClInclude Include="Source\SceneText.h" />
     <ClInclude Include="Source\shader.hpp" />
     <ClInclude Include="Source\Utility.h" />
     <ClInclude Include="Source\Vertex.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Blending.fragmentshader" />
+    <None Include="Shader\ColorFragmentShader.fragmentshader" />
+    <None Include="Shader\comg.fragmentshader" />
+    <None Include="Shader\comg.vertexshader" />
+    <None Include="Shader\LightSource.fragmentshader" />
+    <None Include="Shader\MultiLight.fragmentshader" />
+    <None Include="Shader\MultiTexture.fragmentshader" />
+    <None Include="Shader\Shading.fragmentshader" />
+    <None Include="Shader\Shading.vertexshader" />
+    <None Include="Shader\SimpleFragmentShader.fragmentshader" />
+    <None Include="Shader\SimpleTransform.vertexshader" />
+    <None Include="Shader\SimpleVertexShader.vertexshader" />
+    <None Include="Shader\SingleColor.fragmentshader" />
+    <None Include="Shader\Text.fragmentshader" />
+    <None Include="Shader\TextOnly.fragmentshader" />
+    <None Include="Shader\TextOnly.vertexshader" />
+    <None Include="Shader\Texture.fragmentshader" />
+    <None Include="Shader\Texture.vertexshader" />
+    <None Include="Shader\TransformVertexShader.vertexshader" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9B172635-4E2B-46F1-A403-08F4194D00F5}</ProjectGuid>
