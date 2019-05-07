@@ -1,5 +1,8 @@
-﻿Build started 25/4/2018 7:29:21 PM.
-
-Build succeeded.
-
-Time Elapsed 00:00:00.00
+﻿  MathUtility.cpp
+  MatrixStack.cpp
+  Mtx44.cpp
+  timer.cpp
+  Vector2.cpp
+  Vector3.cpp
+  Generating Code...
+  Common.vcxproj -> C:\Users\Jupiter2\Desktop\2019S1 work\acomg-assignment\DM2210_Framework_1\Debug\Common.lib

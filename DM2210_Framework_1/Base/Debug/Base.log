@@ -1,5 +1,4 @@
-﻿Build started 25/4/2018 7:29:21 PM.
-
-Build succeeded.
-
-Time Elapsed 00:00:00.01
+﻿  MeshBuilder.cpp
+Application.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Base.vcxproj -> C:\Users\Jupiter2\Desktop\2019S1 work\acomg-assignment\DM2210_Framework_1\Debug\Base.exe

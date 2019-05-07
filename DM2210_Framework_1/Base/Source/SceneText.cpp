@@ -147,6 +147,7 @@ void SceneText::Init()
 	meshList[GEO_CONE] = MeshBuilder::GenerateCone("cone", Color(0.5f, 1, 0.3f), 36, 10.f, 10.f);
 	meshList[GEO_CONE]->material.kDiffuse.Set(0.99f, 0.99f, 0.99f);
 	meshList[GEO_CONE]->material.kSpecular.Set(0.f, 0.f, 0.f);
+	meshList[GEO_SKYPLANE] = MeshBuilder::GenerateSkyPlane("skyplane", Color(1, 0, 1), 4, 100.f, 150.f, 10.f, 10.f);
 	
 
 	// Load the ground mesh and texture
@@ -459,6 +460,10 @@ void SceneText::Render()
 
 	RenderGround();
 	//RenderSkybox();
+	modelStack.PushMatrix();
+	modelStack.Translate(-20, 0, -20);
+	RenderMesh(meshList[GEO_OBJECT], false);
+	modelStack.PopMatrix();
 	
 	modelStack.PushMatrix();
 	modelStack.Translate(-20, 0, -20);
