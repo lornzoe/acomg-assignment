@@ -8,6 +8,9 @@
 #include "MatrixStack.h"
 #include "Light.h"
 
+#define LIGHTCOUNT 8
+#define NUMLIGHTCUTOFF 7 + LIGHTCOUNT * 12
+
 class SceneText : public Scene
 {
 	enum UNIFORM_TYPE
@@ -19,19 +22,20 @@ class SceneText : public Scene
 		U_MATERIAL_DIFFUSE,
 		U_MATERIAL_SPECULAR,
 		U_MATERIAL_SHININESS,
-		U_LIGHTENABLED,
-		U_NUMLIGHTS,
-		U_LIGHT0_TYPE,
+
+		U_LIGHT0_TYPE, // 7
 		U_LIGHT0_POSITION,
 		U_LIGHT0_COLOR,
 		U_LIGHT0_POWER,
 		U_LIGHT0_KC,
 		U_LIGHT0_KL,
 		U_LIGHT0_KQ,
+		U_LIGHTENABLED,
 		U_LIGHT0_SPOTDIRECTION,
 		U_LIGHT0_COSCUTOFF,
 		U_LIGHT0_COSINNER,
-		U_LIGHT0_EXPONENT,
+		U_LIGHT0_EXPONENT, // 17 
+		
 		U_LIGHT1_TYPE,
 		U_LIGHT1_POSITION,
 		U_LIGHT1_COLOR,
@@ -39,14 +43,24 @@ class SceneText : public Scene
 		U_LIGHT1_KC,
 		U_LIGHT1_KL,
 		U_LIGHT1_KQ,
+		U_LIGHT1_ENABLED,
 		U_LIGHT1_SPOTDIRECTION,
 		U_LIGHT1_COSCUTOFF,
 		U_LIGHT1_COSINNER,
 		U_LIGHT1_EXPONENT,
+
+		U_NUMLIGHTS = NUMLIGHTCUTOFF,
+
 		U_COLOR_TEXTURE_ENABLED,
-		U_COLOR_TEXTURE,
+		// colortextureenabled lasts for 56 to (56 + 7)
+		U_COLOR_TEXTURE = U_COLOR_TEXTURE_ENABLED + MAX_TEXTURES,
+		// colortexture takes up 64 to (64 + 7)
+		
+		U_COLOR = U_COLOR_TEXTURE + MAX_TEXTURES,
+
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
+
 		U_TOTAL,
 	};
 	enum GEOMETRY_TYPE
@@ -88,6 +102,7 @@ public:
 	~SceneText();
 
 	virtual void Init();
+	virtual void InitParameters();
 	virtual void Update(double dt);
 	virtual void Render();
 	virtual void Exit();
