@@ -4,6 +4,8 @@
 #include "Mesh.h"
 #include "Vertex.h"
 
+#include <vector>
+
 /******************************************************************************/
 /*!
 		Class MeshBuilder:
@@ -25,6 +27,7 @@ public:
 
 	//TSL
 	static Mesh* GenerateSkyPlane(const std::string &meshName, Color color, int slices,float PlanetRadius, float AtmosphereRadius, float hTile, float vTile);
+	static Mesh* GenerateTerrain(const std::string &meshName, const std::string &file_path, std::vector<unsigned char> &heightMap);
 };
 
 #endif
