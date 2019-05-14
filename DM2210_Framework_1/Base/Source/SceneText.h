@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "Mtx44.h"
 #include "Camera3.h"
+#include "CameraAss.h"
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
@@ -103,6 +104,8 @@ public:
 
 	virtual void Init();
 	virtual void InitParameters();
+	virtual void InitMeshList();
+
 	virtual void Update(double dt);
 	virtual void Render();
 	virtual void Exit();
@@ -113,7 +116,9 @@ public:
 	void RenderMesh(Mesh *mesh, bool enableLight);
 	void RenderGround();
 	void RenderSkybox();
-	void RenderSkyPlane(Mesh* mesh, Color color, int slices, float PlanetRadius, float height, float hTile, float vTile); //TSL
+
+	void RenderSkyPlane();
+	void RenderTerrain();
 
 private:
 	unsigned m_vertexArrayID;
@@ -121,7 +126,7 @@ private:
 	unsigned m_programID;
 	unsigned m_parameters[U_TOTAL];
 
-	Camera3 camera;
+	CameraAssignment camera;
 
 	float rotateAngle;
 
@@ -129,7 +134,7 @@ private:
 	MS viewStack;
 	MS projectionStack;
 
-	Light lights[2];
+	Light lights[LIGHTCOUNT];
 
 	bool bLightEnabled;
 
