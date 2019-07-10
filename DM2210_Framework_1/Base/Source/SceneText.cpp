@@ -121,7 +121,6 @@ void SceneText::Init()
 	//lights[1].kQ = 0.001f;
 	//lights[1].cosCutoff = cos(Math::DegreeToRadian(45));
 	//lights[1].cosInner = cos(Math::DegreeToRadian(30));
-	//lights[1].exponent = 3.f;
 	//lights[1].spotDirection.Set(0.f, 1.f, 0.f);
 	
 	glUniform1i(m_parameters[U_NUMLIGHTS], 1);
@@ -194,7 +193,16 @@ void SceneText::Init()
 	meshList[GEO_WATER]->textureArray[0] = LoadTGA("Image//sea.tga");
 
 
-	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
+	meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 1, 6);
+	meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//Fire.tga");
+	fireanim = dynamic_cast<SpriteAnimation*>(meshList[GEO_FIRE]);
+	if (fireanim)
+	{
+		fireanim->m_anim = new Animation();
+		fireanim->m_anim->Set(0, 5, 1, 1.f, true);
+	}
+
+	// Projection matrix : 45ï¿½ Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
 	Mtx44 perspective;
 	//perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
 	//perspective.SetToOrtho(-80, 80, -60, 60, -1000, 1000);
@@ -207,130 +215,194 @@ void SceneText::Init()
 	bLightEnabled = true;
 }
 
-void SceneText::InitParameters()
+//void SceneText::InitParameters()
+//{
+//	{
+//		m_parameters[U_NUMLIGHTS] = glGetUniformLocation(m_programID, "numLights");
+//
+//
+//		m_parameters[U_MVP] = glGetUniformLocation(m_programID, "MVP");
+//		m_parameters[U_MODELVIEW] = glGetUniformLocation(m_programID, "MV");
+//		m_parameters[U_MODELVIEW_INVERSE_TRANSPOSE] = glGetUniformLocation(m_programID, "MV_inverse_transpose");
+//		m_parameters[U_MATERIAL_AMBIENT] = glGetUniformLocation(m_programID, "material.kAmbient");
+//		m_parameters[U_MATERIAL_DIFFUSE] = glGetUniformLocation(m_programID, "material.kDiffuse");
+//		m_parameters[U_MATERIAL_SPECULAR] = glGetUniformLocation(m_programID, "material.kSpecular");
+//		m_parameters[U_MATERIAL_SHININESS] = glGetUniformLocation(m_programID, "material.kShininess");
+//
+//		//init light parameters
+//		for (int i = 0; i < LIGHTCOUNT; i++)
+//		{
+//
+//			cout << "LIGHT " << i << " :" << endl;
+//
+//			string thestring = "lights[" + to_string(i) + "].position_cameraspace";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 7] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 7 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].color";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 8] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 8 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].power";
+//			{
+//				const char *c_str = thestring.c_str();
+//
+//				m_parameters[i * 12 + 9] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 9 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].kC";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 10] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 10 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].kL";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 11] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 11 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].kQ";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 12] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 12 << "] " << thestring << endl;
+//			}
+//			if (i > 0)
+//				thestring = "light" + to_string(i) + "Enabled";
+//			else
+//				thestring = "lightEnabled";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 13] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].type";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 14] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 14 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].spotDirection";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 15] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 15 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].cosCutoff";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 16] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 16 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].cosInner";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 17] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 17 << "] " << thestring << endl;
+//			}
+//			thestring = "lights[" + to_string(i) + "].exponent";
+//			{
+//				const char *c_str = thestring.c_str();
+//				m_parameters[i * 12 + 18] = glGetUniformLocation(m_programID, c_str);
+//				cout << "- [" << i * 12 + 18 << "] " << thestring << endl;
+//			}
+//
+//			cout << "==============" << endl;
+//		}
+//		cout << "NUMLIGHTCUTOFF VALUE: " << NUMLIGHTCUTOFF << endl;
+//
+//		glUniform1i(m_parameters[U_NUMLIGHTS], LIGHTCOUNT);
+//		glEnable(GL_DEPTH_TEST);
+//
+//		// passing uniform parameters after glUseProgram()
+//		for (int i = 0; i < LIGHTCOUNT; i++)
+//		{
+//			glUniform1i(m_parameters[i * 12 + 14], lights[i].type);
+//			glUniform3fv(m_parameters[i * 12 + 8], 1, &lights[i].color.r);
+//			glUniform1f(m_parameters[i * 12 + 9], lights[i].power);
+//			glUniform1f(m_parameters[i * 12 + 10], lights[i].kC);
+//			glUniform1f(m_parameters[i * 12 + 11], lights[i].kL);
+//			glUniform1f(m_parameters[i * 12 + 12], lights[i].kQ);
+//			glUniform1f(m_parameters[i * 12 + 16], lights[i].cosCutoff);
+//			glUniform1f(m_parameters[i * 12 + 17], lights[i].cosInner);
+//			glUniform1f(m_parameters[i * 12 + 18], lights[i].exponent);
+//		};
+//
+//		// init other non-light parameters here
+//		m_parameters[U_COLOR_TEXTURE_ENABLED] = glGetUniformLocation(m_programID, "colorTextureEnabled");
+//		m_parameters[U_COLOR_TEXTURE] = glGetUniformLocation(m_programID, "colorTexture");
+//		m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
+//		m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
+//
+//	}
+//}
+
+void SceneText::InitMeshList()
 {
+	for (int i = 0; i < NUM_GEOMETRY; ++i)
 	{
-		m_parameters[U_NUMLIGHTS] = glGetUniformLocation(m_programID, "numLights");
+		meshList[i] = NULL;
+	}
+
+	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("reference");
+	meshList[GEO_CROSSHAIR] = MeshBuilder::GenerateCrossHair("crosshair");
+	meshList[GEO_QUAD] = MeshBuilder::GenerateQuad("quad", Color(1, 1, 1), 1.f);
+	meshList[GEO_QUAD]->textureArray[0] = LoadTGA("Image//calibri.tga");
+	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
+	meshList[GEO_TEXT]->textureArray[0] = LoadTGA("Image//calibri.tga");
+	meshList[GEO_TEXT]->material.kAmbient.Set(1, 0, 0);
+	meshList[GEO_OBJECT] = MeshBuilder::GenerateOBJ("OBJ1", "OBJ//chair.obj");
+	meshList[GEO_OBJECT]->textureArray[0] = LoadTGA("Image//chair.tga");
+	meshList[GEO_RING] = MeshBuilder::GenerateRing("ring", Color(1, 0, 1), 36, 1, 0.5f);
+	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateSphere("lightball", Color(1, 1, 1), 18, 36, 1.f);
+	meshList[GEO_SPHERE] = MeshBuilder::GenerateSphere("sphere", Color(1, 0, 0), 18, 36, 10.f);
+	meshList[GEO_CONE] = MeshBuilder::GenerateCone("cone", Color(0.5f, 1, 0.3f), 36, 10.f, 10.f);
+	meshList[GEO_CONE]->material.kDiffuse.Set(0.99f, 0.99f, 0.99f);
+	meshList[GEO_CONE]->material.kSpecular.Set(0.f, 0.f, 0.f);
+	meshList[GEO_SKYPLANE] = MeshBuilder::GenerateSkyPlane("skyplane", Color(1.0f, 0, 0), 128, 200.f, 2100.f, 1, 1);
+	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//sky.tga");
+	//TERRAIN
+	meshList[GEO_TERRAIN] = MeshBuilder::GenerateTerrain("terrain", "Image//heightmap2.raw", m_heightMap);
+	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//grass_darkgreen.tga");
+	meshList[GEO_TERRAIN]->textureArray[1] = LoadTGA("Image//ForestFloor.tga");
+
+	//TREE
+	meshList[GEO_TREE] = MeshBuilder::GenerateOBJ("treeObj", "OBJ//Tree.obj");
+	meshList[GEO_TREE]->textureArray[0] = LoadTGA("Image//Tree.tga");
+	meshList[GEO_TREE]->textureArray[1] = LoadTGA("Image//TreeMoss.tga");
+
+	//WATER
+	meshList[GEO_WATER] = MeshBuilder::GenerateQuad("WaterPlane", Color(0, 0, 0), 150.f);
+	meshList[GEO_WATER]->textureArray[0] = LoadTGA("Image//sea.tga");
 
 
-		m_parameters[U_MVP] = glGetUniformLocation(m_programID, "MVP");
-		m_parameters[U_MODELVIEW] = glGetUniformLocation(m_programID, "MV");
-		m_parameters[U_MODELVIEW_INVERSE_TRANSPOSE] = glGetUniformLocation(m_programID, "MV_inverse_transpose");
-		m_parameters[U_MATERIAL_AMBIENT] = glGetUniformLocation(m_programID, "material.kAmbient");
-		m_parameters[U_MATERIAL_DIFFUSE] = glGetUniformLocation(m_programID, "material.kDiffuse");
-		m_parameters[U_MATERIAL_SPECULAR] = glGetUniformLocation(m_programID, "material.kSpecular");
-		m_parameters[U_MATERIAL_SHININESS] = glGetUniformLocation(m_programID, "material.kShininess");
+	// Load the ground mesh and texture
+	meshList[GEO_GRASS_DARKGREEN] = MeshBuilder::GenerateQuad("GRASS_DARKGREEN", Color(1, 0, 1), 1.f);
+	meshList[GEO_GRASS_DARKGREEN]->textureArray[0] = LoadTGA("Image//grass_darkgreen.tga");
+	meshList[GEO_GRASS_LIGHTGREEN] = MeshBuilder::GenerateQuad("GEO_GRASS_LIGHTGREEN", Color(0, 1, 1), 1.f);
+	meshList[GEO_GRASS_LIGHTGREEN]->textureArray[0] = LoadTGA("Image//grass_lightgreen.tga");
 
-		//init light parameters
-		for (int i = 0; i < LIGHTCOUNT; i++)
-		{
+	//meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 8, 8);
+	//meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//Fire1.tga");
+	//fireanim = dynamic_cast<SpriteAnimation*>(meshList[GEO_FIRE]);
+	//if (fireanim)
+	//{
+	//	fireanim->m_anim = new Animation();
+	//	fireanim->m_anim->Set(0, 59, 1, 1.f, true);
+	//}
 
-			cout << "LIGHT " << i << " :" << endl;
-
-			string thestring = "lights[" + to_string(i) + "].position_cameraspace";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 7] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 7 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].color";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 8] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 8 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].power";
-			{
-				const char *c_str = thestring.c_str();
-
-				m_parameters[i * 12 + 9] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 9 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].kC";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 10] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 10 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].kL";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 11] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 11 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].kQ";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 12] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 12 << "] " << thestring << endl;
-			}
-			if (i > 0)
-				thestring = "light" + to_string(i) + "Enabled";
-			else
-				thestring = "lightEnabled";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 13] = glGetUniformLocation(m_programID, c_str);
-				cout << "- " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].type";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 14] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 14 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].spotDirection";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 15] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 15 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].cosCutoff";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 16] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 16 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].cosInner";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 17] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 17 << "] " << thestring << endl;
-			}
-			thestring = "lights[" + to_string(i) + "].exponent";
-			{
-				const char *c_str = thestring.c_str();
-				m_parameters[i * 12 + 18] = glGetUniformLocation(m_programID, c_str);
-				cout << "- [" << i * 12 + 18 << "] " << thestring << endl;
-			}
-
-			cout << "==============" << endl;
-		}
-		cout << "NUMLIGHTCUTOFF VALUE: " << NUMLIGHTCUTOFF << endl;
-
-		glUniform1i(m_parameters[U_NUMLIGHTS], LIGHTCOUNT);
-		glEnable(GL_DEPTH_TEST);
-
-		// passing uniform parameters after glUseProgram()
-		for (int i = 0; i < LIGHTCOUNT; i++)
-		{
-			glUniform1i(m_parameters[i * 12 + 14], lights[i].type);
-			glUniform3fv(m_parameters[i * 12 + 8], 1, &lights[i].color.r);
-			glUniform1f(m_parameters[i * 12 + 9], lights[i].power);
-			glUniform1f(m_parameters[i * 12 + 10], lights[i].kC);
-			glUniform1f(m_parameters[i * 12 + 11], lights[i].kL);
-			glUniform1f(m_parameters[i * 12 + 12], lights[i].kQ);
-			glUniform1f(m_parameters[i * 12 + 16], lights[i].cosCutoff);
-			glUniform1f(m_parameters[i * 12 + 17], lights[i].cosInner);
-			glUniform1f(m_parameters[i * 12 + 18], lights[i].exponent);
-		};
-
-		// init other non-light parameters here
-		m_parameters[U_COLOR_TEXTURE_ENABLED] = glGetUniformLocation(m_programID, "colorTextureEnabled");
-		m_parameters[U_COLOR_TEXTURE] = glGetUniformLocation(m_programID, "colorTexture");
-		m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
-		m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
-
+	meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 1, 6);
+	meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//Fire.tga");
+	fireanim = dynamic_cast<SpriteAnimation*>(meshList[GEO_FIRE]);
+	if (fireanim)
+	{
+		fireanim->m_anim = new Animation();
+		fireanim->m_anim->Set(0, 5, 1, 1.f, true);
 	}
 }
 
@@ -402,6 +474,13 @@ void SceneText::Update(double dt)
 	lights[0].position.Set(camera.position.x, camera.position.y, camera.position.z);
 
 	fps = (float)(1.f / dt);
+
+	fireanim = dynamic_cast<SpriteAnimation*>(meshList[GEO_FIRE]);
+	if (fireanim)
+	{
+		fireanim->Update(dt);
+		fireanim->m_anim->animActive = true;
+	}
 }
 
 void SceneText::RenderText(Mesh* mesh, std::string text, Color color)
@@ -701,10 +780,10 @@ void SceneText::Render()
 	//modelStack.PopMatrix();
 
 	// Render LightBall
-	modelStack.PushMatrix();
-	modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
-	RenderMesh(meshList[GEO_LIGHTBALL], false);
-	modelStack.PopMatrix();
+	//modelStack.PushMatrix();
+	//modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
+	//RenderMesh(meshList[GEO_LIGHTBALL], false);
+	//modelStack.PopMatrix();
 
 	RenderGround();
 	//RenderSkybox();
@@ -712,10 +791,33 @@ void SceneText::Render()
 	modelStack.Translate(0, 0, 0);
 	RenderMesh(meshList[GEO_OBJECT], true);
 	modelStack.PopMatrix();
-	
+//<<<<<<<
+//	
+//	modelStack.PushMatrix();
+//	modelStack.Translate(20, 0, -20);
+//	RenderMesh(meshList[GEO_OBJECT], true);
+//	modelStack.PopMatrix();
+//=======
+
+	//modelStack.PushMatrix();
+	//modelStack.Translate(-20, 0, -20);
+	//RenderMesh(meshList[GEO_OBJECT], false);
+	//modelStack.PopMatrix();
+	//
+	//modelStack.PushMatrix();
+	//modelStack.Translate(-20, 0, -20);
+	//RenderMesh(meshList[GEO_OBJECT], false);
+	//modelStack.PopMatrix();
+	//
+	//modelStack.PushMatrix();
+	//modelStack.Translate(20, 0, -20);
+	//RenderMesh(meshList[GEO_OBJECT], true);
+	//modelStack.PopMatrix();
+
 	modelStack.PushMatrix();
-	modelStack.Translate(20, 0, -20);
-	RenderMesh(meshList[GEO_OBJECT], true);
+	modelStack.Translate(-160.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000) + 28.f, -120.f);
+	modelStack.Scale(50, 50, 50);
+	RenderMesh(meshList[GEO_FIRE], false);
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
