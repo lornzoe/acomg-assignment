@@ -99,11 +99,12 @@ void SceneText::Init()
 
 	m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
 	m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
+
 	m_parameters[U_FOG_COLOR] = glGetUniformLocation(m_programID, "fogParam.color");
 	m_parameters[U_FOG_START] = glGetUniformLocation(m_programID, "fogParam.start");
 	m_parameters[U_FOG_END] = glGetUniformLocation(m_programID, "fogParam.end");
 	m_parameters[U_FOG_DENSITY] = glGetUniformLocation(m_programID, "fogParam.density");
-	m_parameters[U_FOG_TYPE] = glGetUniformLocation(m_programID, "fogParam.end");
+	m_parameters[U_FOG_TYPE] = glGetUniformLocation(m_programID, "fogParam.type");
 	m_parameters[U_FOG_ENABLED] = glGetUniformLocation(m_programID, "fogParam.enabled");
 
 	// Use our shader
@@ -168,15 +169,12 @@ void SceneText::Init()
 	glUniform1f(m_parameters[U_FOG_START], fogStart);
 	fogEnd = 1000.f;
 	glUniform1f(m_parameters[U_FOG_END], fogEnd);
-	fogDensity = 10.f;
+	fogDensity = 0.0001f;
 	glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
 	glUniform1i(m_parameters[U_FOG_TYPE], 1);
 	glUniform1i(m_parameters[U_FOG_ENABLED], 1);
 
 	watertranslate = 0.f;
-
-
-
 
 	for(int i = 0; i < NUM_GEOMETRY; ++i)
 	{
@@ -518,17 +516,23 @@ void SceneText::Update(double dt)
 	}
 	if (Application::IsKeyPressed('O'))
 	{
-		fogDensity += dt;
+		/*fogDensity += dt;
 		cout << "adding to fog density, it's now : " << fogDensity << '\n';
+		glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);*/
+
+		fogDensity = 10.f;
+		cout << "forced fogdensity to value of " << fogDensity << '\n';
 		glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
 
 	}
 	if (Application::IsKeyPressed('P'))
 	{
-		fogDensity -= dt;
+		/*fogDensity -= dt;
 		if (fogDensity < 0.f)
 			fogDensity = 0.f;
-		cout << "reducing to fog density, it's now : " << fogDensity << '\n';
+		cout << "reducing to fog density, it's now : " << fogDensity << '\n';*/
+		fogDensity = 1.f;
+		cout << "forced fogdensity to value of " << fogDensity << '\n';
 
 		glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
 	}
