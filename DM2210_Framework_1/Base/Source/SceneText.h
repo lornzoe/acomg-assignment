@@ -9,7 +9,9 @@
 #include "MatrixStack.h"
 #include "Light.h"
 
-#define LIGHTCOUNT 8
+#include <vector>
+
+#define LIGHTCOUNT 2
 #define NUMLIGHTCUTOFF 7 + LIGHTCOUNT * 12
 
 class SceneText : public Scene
@@ -94,6 +96,10 @@ class SceneText : public Scene
 		GEO_TEXT,
 		//TSL
 		GEO_SKYPLANE,
+		GEO_TERRAIN,
+		GEO_WATER,
+		GEO_TREE,
+
 		NUM_GEOMETRY,
 
 		
@@ -103,8 +109,8 @@ public:
 	~SceneText();
 
 	virtual void Init();
-	virtual void InitParameters();
-	virtual void InitMeshList();
+	void InitParameters();
+	void InitMeshList();
 
 	virtual void Update(double dt);
 	virtual void Render();
@@ -137,6 +143,7 @@ private:
 	Light lights[LIGHTCOUNT];
 
 	bool bLightEnabled;
+	std::vector<unsigned char> m_heightMap;
 
 	float fps;
 };

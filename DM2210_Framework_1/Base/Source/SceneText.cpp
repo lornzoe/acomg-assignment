@@ -6,6 +6,7 @@
 #include "Application.h"
 #include "Utility.h"
 #include "LoadTGA.h"
+#include "LoadHmap.h"
 #include <sstream>
 
 using namespace std;
@@ -99,7 +100,7 @@ void SceneText::Init()
 	// Use our shader
 	glUseProgram(m_programID);
 
-	lights[0].type = Light::LIGHT_DIRECTIONAL;
+	lights[0].type = Light::LIGHT_POINT;
 	lights[0].position.Set(0, 20, 0);
 	lights[0].color.Set(1, 1, 1);
 	lights[0].power = 1;
@@ -114,7 +115,7 @@ void SceneText::Init()
 	lights[1].type = Light::LIGHT_DIRECTIONAL;
 	lights[1].position.Set(1, 1, 0);
 	lights[1].color.Set(1, 1, 0.5f);
-	lights[1].power = 0.4f;
+	lights[1].power = 0.0f;
 	//lights[1].kC = 1.f;
 	//lights[1].kL = 0.01f;
 	//lights[1].kQ = 0.001f;
@@ -169,7 +170,6 @@ void SceneText::Init()
 	meshList[GEO_CONE]->material.kDiffuse.Set(0.99f, 0.99f, 0.99f);
 	meshList[GEO_CONE]->material.kSpecular.Set(0.f, 0.f, 0.f);
 	meshList[GEO_SKYPLANE] = MeshBuilder::GenerateSkyPlane("skyplane", Color(1, 0, 1), 4, 100.f, 150.f, 10.f, 10.f);
-	
 
 	// Load the ground mesh and texture
 	meshList[GEO_GRASS_DARKGREEN] = MeshBuilder::GenerateQuad("GRASS_DARKGREEN", Color(1, 0, 1), 1.f);
@@ -177,10 +177,29 @@ void SceneText::Init()
 	meshList[GEO_GRASS_LIGHTGREEN] = MeshBuilder::GenerateQuad("GEO_GRASS_LIGHTGREEN", Color(0, 1, 1), 1.f);
 	meshList[GEO_GRASS_LIGHTGREEN]->textureArray[0] = LoadTGA("Image//grass_lightgreen.tga");
 
+	meshList[GEO_SKYPLANE] = MeshBuilder::GenerateSkyPlane("skyplane", Color(1.0f, 0, 0), 128, 200.f, 2100.f, 1, 1);
+	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//sky.tga");
+	//TERRAIN
+	meshList[GEO_TERRAIN] = MeshBuilder::GenerateTerrain("terrain", "Image//heightmap2.raw", m_heightMap);
+	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//grass_darkgreen.tga");
+	meshList[GEO_TERRAIN]->textureArray[1] = LoadTGA("Image//ForestFloor.tga");
+
+	//TREE
+	meshList[GEO_TREE] = MeshBuilder::GenerateOBJ("treeObj", "OBJ//Tree.obj");
+	meshList[GEO_TREE]->textureArray[0] = LoadTGA("Image//Tree.tga");
+	meshList[GEO_TREE]->textureArray[1] = LoadTGA("Image//TreeMoss.tga");
+
+	//WATER
+	meshList[GEO_WATER] = MeshBuilder::GenerateQuad("WaterPlane", Color(0, 0, 0), 150.f);
+	meshList[GEO_WATER]->textureArray[0] = LoadTGA("Image//sea.tga");
+
+
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
 	Mtx44 perspective;
-	perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
+	//perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
 	//perspective.SetToOrtho(-80, 80, -60, 60, -1000, 1000);
+	perspective.SetToPerspective(75.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
+
 	projectionStack.LoadMatrix(perspective);
 	
 	rotateAngle = 0; 
@@ -491,7 +510,7 @@ void SceneText::RenderMesh(Mesh *mesh, bool enableLight)
 		modelView_inverse_transpose = modelView.GetInverse().GetTranspose();
 		glUniformMatrix4fv(m_parameters[U_MODELVIEW_INVERSE_TRANSPOSE], 1, GL_FALSE, &modelView.a[0]);
 
-		//load material
+		//load materidal
 		glUniform3fv(m_parameters[U_MATERIAL_AMBIENT], 1, &mesh->material.kAmbient.r);
 		glUniform3fv(m_parameters[U_MATERIAL_DIFFUSE], 1, &mesh->material.kDiffuse.r);
 		glUniform3fv(m_parameters[U_MATERIAL_SPECULAR], 1, &mesh->material.kSpecular.r);
@@ -506,7 +525,7 @@ void SceneText::RenderMesh(Mesh *mesh, bool enableLight)
 	{
 		if (mesh->textureArray[i] > 0)
 		{
-			cout << "asdf\n";
+			//cout << "asdf\n";
 			glUniform1i(m_parameters[U_COLOR_TEXTURE_ENABLED + i], 1);
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, mesh->textureArray[i]);
@@ -553,6 +572,30 @@ void SceneText::RenderGround()
 	modelStack.PopMatrix();
 }
 
+void SceneText::RenderTerrain()
+{
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 0, 0);
+	modelStack.Scale(4000.0f, 350.f, 4000.0f);
+	RenderMesh(meshList[GEO_TERRAIN], true);
+	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(90, 80, -186);
+	modelStack.Rotate(-90, 1, 0, 0);
+	modelStack.Scale(4000.f, 4000.f, 1.f);
+	RenderMesh(meshList[GEO_WATER], false);
+	modelStack.PopMatrix();
+}
+
+void SceneText::RenderSkyPlane()
+{
+	modelStack.PushMatrix();
+	modelStack.Translate(0, 2100, 0);
+	modelStack.Rotate(rotateAngle, 0, 1, 0);
+	RenderMesh(meshList[GEO_SKYPLANE], false);
+	modelStack.PopMatrix();
+}
 void SceneText::Render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -571,7 +614,7 @@ void SceneText::Render()
 	// Model matrix : an identity matrix (model will be at the origin)
 	modelStack.LoadIdentity();
 
-	if(lights[0].type == Light::LIGHT_DIRECTIONAL)
+	/*if(lights[0].type == Light::LIGHT_DIRECTIONAL)
 	{
 		Vector3 lightDir(lights[0].position.x, lights[0].position.y, lights[0].position.z);
 		Vector3 lightDirection_cameraspace = viewStack.Top() * lightDir;
@@ -606,9 +649,41 @@ void SceneText::Render()
 	{
 		Position lightPosition_cameraspace = viewStack.Top() * lights[1].position;
 		glUniform3fv(m_parameters[U_LIGHT1_POSITION], 1, &lightPosition_cameraspace.x);
-	}
+	}*/
 	
+	for (int i = 0; i < LIGHTCOUNT; i++)
+	{
+		if (lights[i].type == Light::LIGHT_DIRECTIONAL)
+		{
+			Vector3 lightDir(lights[i].position.x, lights[i].position.y, lights[i].position.z);
+			Vector3 lightDirection_cameraspace = viewStack.Top() * lightDir;
+			glUniform3fv(m_parameters[i * 12 + 8], 1, &lightDirection_cameraspace.x);
+		}
+		else if (lights[i].type == Light::LIGHT_SPOT)
+		{
+			Position lightPosition_cameraspace = viewStack.Top() * lights[i].position;
+			glUniform3fv(m_parameters[i * 12 + 8], 1, &lightPosition_cameraspace.x);
+			Vector3 spotDirection_cameraspace = viewStack.Top() * lights[i].spotDirection;
+			glUniform3fv(m_parameters[i * 12 + 15], 1, &spotDirection_cameraspace.x);
+		}
+		else
+		{
+			Position lightPosition_cameraspace = viewStack.Top() * lights[i].position;
+			glUniform3fv(m_parameters[i * 12 + 8], 1, &lightPosition_cameraspace.x);
+		}
+	}
 	RenderMesh(meshList[GEO_AXES], false);
+
+
+	//RenderSkyPlane();
+	//RenderTerrain();
+
+	//modelStack.PushMatrix();
+	//modelStack.Translate(-116.f, 350.f * ReadHeightMap(m_heightMap, -116.f / 4000, -201.f / 4000) - 40.f, -201.f);
+	//modelStack.Rotate(-20, 0, 0, 1);
+	//modelStack.Scale(30.0f, 30.f, 30.f);
+	//RenderMesh(meshList[GEO_TREE], true);
+	//modelStack.PopMatrix();
 
 	// Render LightBall
 	modelStack.PushMatrix();
@@ -619,13 +694,8 @@ void SceneText::Render()
 	RenderGround();
 	//RenderSkybox();
 	modelStack.PushMatrix();
-	modelStack.Translate(-20, 0, -20);
-	RenderMesh(meshList[GEO_OBJECT], false);
-	modelStack.PopMatrix();
-	
-	modelStack.PushMatrix();
-	modelStack.Translate(-20, 0, -20);
-	RenderMesh(meshList[GEO_OBJECT], false);
+	modelStack.Translate(0, 0, 0);
+	RenderMesh(meshList[GEO_OBJECT], true);
 	modelStack.PopMatrix();
 	
 	modelStack.PushMatrix();
@@ -640,7 +710,7 @@ void SceneText::Render()
 	modelStack.PopMatrix();
 
 	// Render the crosshair
-	RenderMeshIn2D(meshList[GEO_CROSSHAIR], false, 10.0f);
+	//RenderMeshIn2D(meshList[GEO_CROSSHAIR], false, 10.0f);
 
 	//On screen text
 	std::ostringstream ss;
