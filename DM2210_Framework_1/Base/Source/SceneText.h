@@ -103,6 +103,9 @@ class SceneText : public Scene
 		GEO_OBJECT,
 		GEO_TEXT,
 		GEO_FIRE,
+		GEO_CAMPFIRE,
+		//GEO_COTTAGE,
+		GEO_FENCE,
 		//TSL
 		GEO_SKYPLANE,
 		GEO_TERRAIN,
@@ -153,10 +156,16 @@ private:
 	Light lights[LIGHTCOUNT];
 
 	bool bLightEnabled;
+	float watertranslate;
+
 	std::vector<unsigned char> m_heightMap;
 
 	float fps;
 	SpriteAnimation * fireanim;
+
+	Color fogColor;
+	float fogDensity;
+	float fogStart, fogEnd;
 };
 
 #endif
