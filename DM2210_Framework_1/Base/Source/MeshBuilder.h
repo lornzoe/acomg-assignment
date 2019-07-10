@@ -3,6 +3,7 @@
 
 #include "Mesh.h"
 #include "Vertex.h"
+#include "SpriteAnimation.h"
 
 #include <vector>
 
@@ -28,6 +29,7 @@ public:
 	//TSL
 	static Mesh* GenerateSkyPlane(const std::string &meshName, Color color, int slices,float PlanetRadius, float AtmosphereRadius, float hTile, float vTile);
 	static Mesh* GenerateTerrain(const std::string &meshName, const std::string &file_path, std::vector<unsigned char> &heightMap);
+	static SpriteAnimation* GenerateSpriteAnimation(const std::string &meshName, unsigned numRow, unsigned numCol);
 };
 
 #endif
