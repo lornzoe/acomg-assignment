@@ -501,6 +501,8 @@ void SceneText::Update(double dt)
 	{
 		lights[0].power -= (float)(10.f * dt);
 		glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
+	}
+
 	if (Application::IsKeyPressed('Z'))
 	{
 		glUniform1i(m_parameters[U_FOG_ENABLED], 0);
@@ -509,32 +511,21 @@ void SceneText::Update(double dt)
 	{
 		glUniform1i(m_parameters[U_FOG_ENABLED], 1);
 	}
-	if (Application::IsKeyPressed('C'))
-	{
-		// reset fog color
-		fogColor.Set(0.79f, 0.84f, 0.85f);
-		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
-
-	}
-	if (Application::IsKeyPressed('V'))
-	{
-		fogColor.Set(0, 0, 1.f);
-		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
-	}
+	
 	if (Application::IsKeyPressed(VK_RETURN))
 	{
 		cout << camera.position.x << ',' << camera.position.z << '\n';
 	}
 	if (Application::IsKeyPressed('O'))
 	{
-		fogDensity += 0.01f * dt;
+		fogDensity += dt;
 		cout << "adding to fog density, it's now : " << fogDensity << '\n';
 		glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
 
 	}
 	if (Application::IsKeyPressed('P'))
 	{
-		fogDensity -= 0.01f * dt;
+		fogDensity -= dt;
 		if (fogDensity < 0.f)
 			fogDensity = 0.f;
 		cout << "reducing to fog density, it's now : " << fogDensity << '\n';
@@ -571,18 +562,23 @@ void SceneText::Update(double dt)
 		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
 	}
 
-
-
-	rotateAngle += (float)( dt);
-	watertranslate += (float)(dt) * 50;
-	if (watertranslate > 5000.f)
+	if (Application::IsKeyPressed('C'))
 	{
-		watertranslate -= 00.f;
-	}
+		// reset fog color
+		fogColor.Set(0.79f, 0.84f, 0.85f);
+		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
 
 	}
+	if (Application::IsKeyPressed('V'))
+	{
+		fogColor.Set(0, 0, 1.f);
+		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+	}
+
 
 	rotateAngle += (float)(10 * dt);
+	watertranslate += (float)(dt) * 50;
+
 	lights[0].position.Set(camera.position.x, camera.position.y, camera.position.z);
 
 	camera.Update(dt);
