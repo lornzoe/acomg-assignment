@@ -41,9 +41,8 @@ void SceneText::Init()
 	glGenVertexArrays(1, &m_vertexArrayID);
 	glBindVertexArray(m_vertexArrayID);
 
-	m_programID = LoadShaders( "Shader//Texture.vertexshader", "Shader//MultiTexture.fragmentshader" );
-	//InitParameters();
-	// Get a handle for our uniform
+	m_programID = LoadShaders( "Shader//Fog.vertexshader", "Shader//Fog.fragmentshader" );
+	
 	m_parameters[U_MVP] = glGetUniformLocation(m_programID, "MVP");
 	m_parameters[U_MODELVIEW] = glGetUniformLocation(m_programID, "MV");
 	m_parameters[U_MODELVIEW_INVERSE_TRANSPOSE] = glGetUniformLocation(m_programID, "MV_inverse_transpose");
@@ -96,7 +95,17 @@ void SceneText::Init()
 	// Get a handle for our "textColor" uniform
 	m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
 	m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
-	
+
+
+	m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
+	m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
+	m_parameters[U_FOG_COLOR] = glGetUniformLocation(m_programID, "fogParam.color");
+	m_parameters[U_FOG_START] = glGetUniformLocation(m_programID, "fogParam.start");
+	m_parameters[U_FOG_END] = glGetUniformLocation(m_programID, "fogParam.end");
+	m_parameters[U_FOG_DENSITY] = glGetUniformLocation(m_programID, "fogParam.density");
+	m_parameters[U_FOG_TYPE] = glGetUniformLocation(m_programID, "fogParam.end");
+	m_parameters[U_FOG_ENABLED] = glGetUniformLocation(m_programID, "fogParam.enabled");
+
 	// Use our shader
 	glUseProgram(m_programID);
 
@@ -147,6 +156,21 @@ void SceneText::Init()
 	glUniform1f(m_parameters[U_LIGHT1_EXPONENT], lights[1].exponent);
 
 	camera.Init(Vector3(0, 0, 10), Vector3(0, 0, 0), Vector3(0, 1, 0));
+
+	// Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
+	
+	rotateAngle = 0; 
+	bLightEnabled = true;
+
+	Color fogColor(0.79f, 0.84f, 0.85f);
+	glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+	glUniform1f(m_parameters[U_FOG_START], 10.f);
+	glUniform1f(m_parameters[U_FOG_END], 1000.f);
+	glUniform1f(m_parameters[U_FOG_DENSITY], 0.0007f);
+	glUniform1i(m_parameters[U_FOG_TYPE], 1);
+	glUniform1i(m_parameters[U_FOG_ENABLED], 1);
+
+
 
 	for(int i = 0; i < NUM_GEOMETRY; ++i)
 	{
@@ -596,11 +620,14 @@ void SceneText::RenderMesh(Mesh *mesh, bool enableLight)
 
 	MVP = projectionStack.Top() * viewStack.Top() * modelStack.Top();
 	glUniformMatrix4fv(m_parameters[U_MVP], 1, GL_FALSE, &MVP.a[0]);
+
+	modelView = viewStack.Top() * modelStack.Top();
+	glUniformMatrix4fv(m_parameters[U_MODELVIEW], 1, GL_FALSE, &modelView.a[0]);
+
 	if (enableLight && bLightEnabled)
 	{
 		glUniform1i(m_parameters[U_LIGHTENABLED], 1);
-		modelView = viewStack.Top() * modelStack.Top();
-		glUniformMatrix4fv(m_parameters[U_MODELVIEW], 1, GL_FALSE, &modelView.a[0]);
+		
 		modelView_inverse_transpose = modelView.GetInverse().GetTranspose();
 		glUniformMatrix4fv(m_parameters[U_MODELVIEW_INVERSE_TRANSPOSE], 1, GL_FALSE, &modelView.a[0]);
 

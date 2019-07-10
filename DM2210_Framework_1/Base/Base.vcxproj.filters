@@ -181,5 +181,11 @@
     <None Include="Shader\TransformVertexShader.vertexshader">
       <Filter>Shader</Filter>
     </None>
+    <None Include="Shader\Fog.fragmentshader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Fog.vertexshader">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

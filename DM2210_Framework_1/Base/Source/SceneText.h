@@ -65,6 +65,13 @@ class SceneText : public Scene
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
 
+		U_FOG_COLOR,
+		U_FOG_START,
+		U_FOG_END,
+		U_FOG_DENSITY,
+		U_FOG_TYPE,
+		U_FOG_ENABLED,
+
 		U_TOTAL,
 	};
 	enum GEOMETRY_TYPE
