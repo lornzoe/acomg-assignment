@@ -467,11 +467,11 @@ void SceneText::Update(double dt)
 	}
 
 	rotateAngle += (float)(10 * dt);
+	lights[0].position.Set(camera.position.x, camera.position.y, camera.position.z);
 
 	camera.Update(dt);
 	camera.SetCameraY(30 + 350.f * ReadHeightMap(m_heightMap, camera.position.x / 4000, camera.position.z / 4000), dt);
 
-	lights[0].position.Set(camera.position.x, camera.position.y, camera.position.z);
 
 	fps = (float)(1.f / dt);
 
@@ -769,7 +769,7 @@ void SceneText::Render()
 	RenderMesh(meshList[GEO_AXES], false);
 
 
-	//RenderSkyPlane();
+	RenderSkyPlane();
 	RenderTerrain();
 
 	//modelStack.PushMatrix();
@@ -791,28 +791,6 @@ void SceneText::Render()
 	modelStack.Translate(0, 0, 0);
 	RenderMesh(meshList[GEO_OBJECT], true);
 	modelStack.PopMatrix();
-//<<<<<<<
-//	
-//	modelStack.PushMatrix();
-//	modelStack.Translate(20, 0, -20);
-//	RenderMesh(meshList[GEO_OBJECT], true);
-//	modelStack.PopMatrix();
-//=======
-
-	//modelStack.PushMatrix();
-	//modelStack.Translate(-20, 0, -20);
-	//RenderMesh(meshList[GEO_OBJECT], false);
-	//modelStack.PopMatrix();
-	//
-	//modelStack.PushMatrix();
-	//modelStack.Translate(-20, 0, -20);
-	//RenderMesh(meshList[GEO_OBJECT], false);
-	//modelStack.PopMatrix();
-	//
-	//modelStack.PushMatrix();
-	//modelStack.Translate(20, 0, -20);
-	//RenderMesh(meshList[GEO_OBJECT], true);
-	//modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
 	modelStack.Translate(-160.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000) + 28.f, -120.f);
