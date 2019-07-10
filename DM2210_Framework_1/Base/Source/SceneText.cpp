@@ -103,7 +103,7 @@ void SceneText::Init()
 	lights[0].type = Light::LIGHT_POINT;
 	lights[0].position.Set(0, 20, 0);
 	lights[0].color.Set(1, 1, 1);
-	lights[0].power = 1;
+	lights[0].power = 1.f;
 	lights[0].kC = 1.f;
 	lights[0].kL = 0.01f;
 	lights[0].kQ = 0.001f;
@@ -369,22 +369,37 @@ void SceneText::Update(double dt)
 		bLightEnabled = false;
 	}
 
-	if(Application::IsKeyPressed('I'))
-		lights[0].position.z -= (float)(10.f * dt);
-	if(Application::IsKeyPressed('K'))
-		lights[0].position.z += (float)(10.f * dt);
-	if(Application::IsKeyPressed('J'))
-		lights[0].position.x -= (float)(10.f * dt);
-	if(Application::IsKeyPressed('L'))
-		lights[0].position.x += (float)(10.f * dt);
-	if(Application::IsKeyPressed('O'))
-		lights[0].position.y -= (float)(10.f * dt);
-	if(Application::IsKeyPressed('P'))
-		lights[0].position.y += (float)(10.f * dt);
+	//if(Application::IsKeyPressed('I'))
+	//	lights[0].position.z -= (float)(10.f * dt);
+	//if(Application::IsKeyPressed('K'))
+	//	lights[0].position.z += (float)(10.f * dt);
+	//if(Application::IsKeyPressed('J'))
+	//	lights[0].position.x -= (float)(10.f * dt);
+	//if(Application::IsKeyPressed('L'))
+	//	lights[0].position.x += (float)(10.f * dt);
+	//if(Application::IsKeyPressed('O'))
+	//	lights[0].position.y -= (float)(10.f * dt);
+	//if(Application::IsKeyPressed('P'))
+	//	lights[0].position.y += (float)(10.f * dt);
+	if (Application::IsKeyPressed('M'))
+	{
+		lights[0].power += (float)(10.f * dt);
+		glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
+
+	}
+	if (Application::IsKeyPressed('N'))
+	{
+		lights[0].power -= (float)(10.f * dt);
+		glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
+
+	}
 
 	rotateAngle += (float)(10 * dt);
 
 	camera.Update(dt);
+	camera.SetCameraY(30 + 350.f * ReadHeightMap(m_heightMap, camera.position.x / 4000, camera.position.z / 4000), dt);
+
+	lights[0].position.Set(camera.position.x, camera.position.y, camera.position.z);
 
 	fps = (float)(1.f / dt);
 }
@@ -676,7 +691,7 @@ void SceneText::Render()
 
 
 	//RenderSkyPlane();
-	//RenderTerrain();
+	RenderTerrain();
 
 	//modelStack.PushMatrix();
 	//modelStack.Translate(-116.f, 350.f * ReadHeightMap(m_heightMap, -116.f / 4000, -201.f / 4000) - 40.f, -201.f);
