@@ -65,6 +65,13 @@ class SceneText : public Scene
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
 
+		U_FOG_COLOR,
+		U_FOG_START,
+		U_FOG_END,
+		U_FOG_DENSITY,
+		U_FOG_TYPE,
+		U_FOG_ENABLED,
+
 		U_TOTAL,
 	};
 	enum GEOMETRY_TYPE
@@ -96,6 +103,9 @@ class SceneText : public Scene
 		GEO_OBJECT,
 		GEO_TEXT,
 		GEO_FIRE,
+		GEO_CAMPFIRE,
+		//GEO_COTTAGE,
+		GEO_FENCE,
 		//TSL
 		GEO_SKYPLANE,
 		GEO_TERRAIN,
@@ -146,10 +156,16 @@ private:
 	Light lights[LIGHTCOUNT];
 
 	bool bLightEnabled;
+	float watertranslate;
+
 	std::vector<unsigned char> m_heightMap;
 
 	float fps;
 	SpriteAnimation * fireanim;
+
+	Color fogColor;
+	float fogDensity;
+	float fogStart, fogEnd;
 };
 
 #endif

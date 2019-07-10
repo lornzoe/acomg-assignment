@@ -54,9 +54,6 @@
     <ClCompile Include="Source\LoadHmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Test.cpp">
-      <Filter>Shader</Filter>
-    </ClCompile>
     <ClCompile Include="Source\CameraAss.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -179,6 +176,12 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Shader\TransformVertexShader.vertexshader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Fog.fragmentshader">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\Fog.vertexshader">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

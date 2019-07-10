@@ -41,9 +41,8 @@ void SceneText::Init()
 	glGenVertexArrays(1, &m_vertexArrayID);
 	glBindVertexArray(m_vertexArrayID);
 
-	m_programID = LoadShaders( "Shader//Texture.vertexshader", "Shader//MultiTexture.fragmentshader" );
-	//InitParameters();
-	// Get a handle for our uniform
+	m_programID = LoadShaders( "Shader//Fog.vertexshader", "Shader//Fog.fragmentshader" );
+	
 	m_parameters[U_MVP] = glGetUniformLocation(m_programID, "MVP");
 	m_parameters[U_MODELVIEW] = glGetUniformLocation(m_programID, "MV");
 	m_parameters[U_MODELVIEW_INVERSE_TRANSPOSE] = glGetUniformLocation(m_programID, "MV_inverse_transpose");
@@ -96,7 +95,18 @@ void SceneText::Init()
 	// Get a handle for our "textColor" uniform
 	m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
 	m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
-	
+
+
+	m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
+	m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
+
+	m_parameters[U_FOG_COLOR] = glGetUniformLocation(m_programID, "fogParam.color");
+	m_parameters[U_FOG_START] = glGetUniformLocation(m_programID, "fogParam.start");
+	m_parameters[U_FOG_END] = glGetUniformLocation(m_programID, "fogParam.end");
+	m_parameters[U_FOG_DENSITY] = glGetUniformLocation(m_programID, "fogParam.density");
+	m_parameters[U_FOG_TYPE] = glGetUniformLocation(m_programID, "fogParam.type");
+	m_parameters[U_FOG_ENABLED] = glGetUniformLocation(m_programID, "fogParam.enabled");
+
 	// Use our shader
 	glUseProgram(m_programID);
 
@@ -147,6 +157,24 @@ void SceneText::Init()
 	glUniform1f(m_parameters[U_LIGHT1_EXPONENT], lights[1].exponent);
 
 	camera.Init(Vector3(0, 0, 10), Vector3(0, 0, 0), Vector3(0, 1, 0));
+
+	// Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
+	
+	rotateAngle = 0; 
+	bLightEnabled = true;
+
+	fogColor.Set(0.79f, 0.84f, 0.85f);
+	glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+	fogStart = 10.f;
+	glUniform1f(m_parameters[U_FOG_START], fogStart);
+	fogEnd = 1000.f;
+	glUniform1f(m_parameters[U_FOG_END], fogEnd);
+	fogDensity = 0.0001f;
+	glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
+	glUniform1i(m_parameters[U_FOG_TYPE], 1);
+	glUniform1i(m_parameters[U_FOG_ENABLED], 1);
+
+	watertranslate = 0.f;
 
 	for(int i = 0; i < NUM_GEOMETRY; ++i)
 	{
@@ -201,6 +229,10 @@ void SceneText::Init()
 		fireanim->m_anim = new Animation();
 		fireanim->m_anim->Set(0, 5, 1, 1.f, true);
 	}
+
+
+	meshList[GEO_CAMPFIRE] = MeshBuilder::GenerateOBJ("Campfire", "OBJ//Campfire.obj");
+	meshList[GEO_CAMPFIRE]->textureArray[0] = LoadTGA("Image//Campfire.tga");
 
 	// Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
 	Mtx44 perspective;
@@ -375,7 +407,7 @@ void SceneText::InitMeshList()
 	meshList[GEO_TREE] = MeshBuilder::GenerateOBJ("treeObj", "OBJ//Tree.obj");
 	meshList[GEO_TREE]->textureArray[0] = LoadTGA("Image//Tree.tga");
 	meshList[GEO_TREE]->textureArray[1] = LoadTGA("Image//TreeMoss.tga");
-
+	 
 	//WATER
 	meshList[GEO_WATER] = MeshBuilder::GenerateQuad("WaterPlane", Color(0, 0, 0), 150.f);
 	meshList[GEO_WATER]->textureArray[0] = LoadTGA("Image//sea.tga");
@@ -395,15 +427,19 @@ void SceneText::InitMeshList()
 	//	fireanim->m_anim = new Animation();
 	//	fireanim->m_anim->Set(0, 59, 1, 1.f, true);
 	//}
-
-	meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 1, 6);
-	meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//Fire.tga");
+	meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 6, 6);
+	meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//Fire2.tga");
 	fireanim = dynamic_cast<SpriteAnimation*>(meshList[GEO_FIRE]);
 	if (fireanim)
 	{
 		fireanim->m_anim = new Animation();
-		fireanim->m_anim->Set(0, 5, 1, 1.f, true);
+		fireanim->m_anim->Set(0, 35, 1, 0.5f, true);
 	}
+	
+	/*meshList[GEO_COTTAGE] = MeshBuilder::GenerateOBJ("cottage", "OBJ//cottagev2.obj");
+	meshList[GEO_COTTAGE]->textureArray[0] = LoadTGA("Image//cottagev2.tga");
+	meshList[GEO_COTTAGE]->textureArray[1] = LoadTGA("Image//cottage1v2.tga");*/
+
 }
 
 void SceneText::Update(double dt)
@@ -463,15 +499,94 @@ void SceneText::Update(double dt)
 	{
 		lights[0].power -= (float)(10.f * dt);
 		glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
+	}
+
+	if (Application::IsKeyPressed('Z'))
+	{
+		glUniform1i(m_parameters[U_FOG_ENABLED], 0);
+	}
+	else if (Application::IsKeyPressed('X'))
+	{
+		glUniform1i(m_parameters[U_FOG_ENABLED], 1);
+	}
+	
+	if (Application::IsKeyPressed(VK_RETURN))
+	{
+		cout << camera.position.x << ',' << camera.position.z << '\n';
+	}
+	if (Application::IsKeyPressed('O'))
+	{
+		/*fogDensity += dt;
+		cout << "adding to fog density, it's now : " << fogDensity << '\n';
+		glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);*/
+
+		fogDensity = 10.f;
+		cout << "forced fogdensity to value of " << fogDensity << '\n';
+		glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
+
+	}
+	if (Application::IsKeyPressed('P'))
+	{
+		/*fogDensity -= dt;
+		if (fogDensity < 0.f)
+			fogDensity = 0.f;
+		cout << "reducing to fog density, it's now : " << fogDensity << '\n';*/
+		fogDensity = 1.f;
+		cout << "forced fogdensity to value of " << fogDensity << '\n';
+
+		glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
+	}
+	if (Application::IsKeyPressed('K'))
+	{
+
+		fogStart += 10.f * dt;
+		fogEnd += 10.f * dt;
+		glUniform1f(m_parameters[U_FOG_START], fogStart);
+		glUniform1f(m_parameters[U_FOG_END], fogEnd);
+
+	}
+	if (Application::IsKeyPressed('L'))
+	{
+
+		fogStart -= 10.f * dt;
+		fogEnd -= 10.f * dt;
+		glUniform1f(m_parameters[U_FOG_START], fogStart);
+		glUniform1f(m_parameters[U_FOG_END], fogEnd);
 
 	}
 
+	if (camera.position.y < 80.f)
+	{
+		fogColor.Set(0, 0, 1.f);
+		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+	}
+	else
+	{
+		fogColor.Set(0.79f, 0.84f, 0.85f);
+		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+	}
+
+	if (Application::IsKeyPressed('C'))
+	{
+		// reset fog color
+		fogColor.Set(0.79f, 0.84f, 0.85f);
+		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+
+	}
+	if (Application::IsKeyPressed('V'))
+	{
+		fogColor.Set(0, 0, 1.f);
+		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+	}
+
+
 	rotateAngle += (float)(10 * dt);
+	watertranslate += (float)(dt) * 50;
+
 	lights[0].position.Set(camera.position.x, camera.position.y, camera.position.z);
 
 	camera.Update(dt);
 	camera.SetCameraY(30 + 350.f * ReadHeightMap(m_heightMap, camera.position.x / 4000, camera.position.z / 4000), dt);
-
 
 	fps = (float)(1.f / dt);
 
@@ -596,11 +711,14 @@ void SceneText::RenderMesh(Mesh *mesh, bool enableLight)
 
 	MVP = projectionStack.Top() * viewStack.Top() * modelStack.Top();
 	glUniformMatrix4fv(m_parameters[U_MVP], 1, GL_FALSE, &MVP.a[0]);
+
+	modelView = viewStack.Top() * modelStack.Top();
+	glUniformMatrix4fv(m_parameters[U_MODELVIEW], 1, GL_FALSE, &modelView.a[0]);
+
 	if (enableLight && bLightEnabled)
 	{
 		glUniform1i(m_parameters[U_LIGHTENABLED], 1);
-		modelView = viewStack.Top() * modelStack.Top();
-		glUniformMatrix4fv(m_parameters[U_MODELVIEW], 1, GL_FALSE, &modelView.a[0]);
+		
 		modelView_inverse_transpose = modelView.GetInverse().GetTranspose();
 		glUniformMatrix4fv(m_parameters[U_MODELVIEW_INVERSE_TRANSPOSE], 1, GL_FALSE, &modelView.a[0]);
 
@@ -675,11 +793,20 @@ void SceneText::RenderTerrain()
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
-	modelStack.Translate(90, 80, -186);
-	modelStack.Rotate(-90, 1, 0, 0);
-	modelStack.Scale(4000.f, 4000.f, 1.f);
+	modelStack.Translate(90.f, 80.f, -186.f + watertranslate);
+	modelStack.Rotate(-90.f, 1.f, 0.f, 0.);
+	//modelStack.Scale(4000.f, 4000.f, 1.f);
+	modelStack.Scale(50.f, 50.f, 1.f);
 	RenderMesh(meshList[GEO_WATER], false);
 	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(90.f, 80.f, -106.f + watertranslate);
+	modelStack.Rotate(-90.f, 1.f, 0.f, 0.);
+	//modelStack.Scale(4000.f, 4000.f, 1.f);
+	modelStack.Scale(50.f, 50.f, 1.f);
+	modelStack.PopMatrix();
+
 }
 
 void SceneText::RenderSkyPlane()
@@ -780,10 +907,10 @@ void SceneText::Render()
 	//modelStack.PopMatrix();
 
 	// Render LightBall
-	//modelStack.PushMatrix();
-	//modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
-	//RenderMesh(meshList[GEO_LIGHTBALL], false);
-	//modelStack.PopMatrix();
+	modelStack.PushMatrix();
+	modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
+	RenderMesh(meshList[GEO_LIGHTBALL], false);
+	modelStack.PopMatrix();
 
 	RenderGround();
 	//RenderSkybox();
@@ -793,8 +920,84 @@ void SceneText::Render()
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
-	modelStack.Translate(-160.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000) + 28.f, -120.f);
-	modelStack.Scale(50, 50, 50);
+	modelStack.Translate(-1110.f, 350.f * ReadHeightMap(m_heightMap, -1110.f / 4000, -460.f / 4000) - 40.f, -460.f);
+	modelStack.Rotate(-20, 0, 0, 1);
+	modelStack.Scale(30.0f, 30.f, 30.f);
+	RenderMesh(meshList[GEO_TREE], true);
+	modelStack.PopMatrix(); 
+	
+	modelStack.PushMatrix();
+	modelStack.Translate(-975.f, 350.f * ReadHeightMap(m_heightMap, -975.f / 4000, -735.f / 4000) - 40.f, -735.f);
+	modelStack.Rotate(-20, 0, 0, 1);
+	modelStack.Scale(30.0f, 30.f, 30.f);
+	RenderMesh(meshList[GEO_TREE], true);
+	modelStack.PopMatrix(); 
+	
+	modelStack.PushMatrix();
+	modelStack.Translate(-1065.f, 350.f * ReadHeightMap(m_heightMap, -1065.f / 4000, -900.f / 4000) - 40.f, -900.f);
+	modelStack.Rotate(-20, 0, 0, 1);
+	modelStack.Scale(30.0f, 30.f, 30.f);
+	RenderMesh(meshList[GEO_TREE], true);
+	modelStack.PopMatrix(); 
+	
+	modelStack.PushMatrix();
+	modelStack.Translate(-715.f, 350.f * ReadHeightMap(m_heightMap, -715.f / 4000, -1170.f / 4000) - 40.f, -1170.f);
+	modelStack.Rotate(-20, 0, 0, 1);
+	modelStack.Scale(30.0f, 30.f, 30.f);
+	RenderMesh(meshList[GEO_TREE], true);
+	modelStack.PopMatrix(); 
+	
+	modelStack.PushMatrix();
+	modelStack.Translate(-675.f, 350.f * ReadHeightMap(m_heightMap, -675.f / 4000, -1350.f / 4000) - 40.f, -1350.f);
+	modelStack.Rotate(-20, 0, 0, 1);
+	modelStack.Scale(30.0f, 30.f, 30.f);
+	RenderMesh(meshList[GEO_TREE], true);
+	modelStack.PopMatrix(); 
+	
+	modelStack.PushMatrix();
+	modelStack.Translate(-340.f, 350.f * ReadHeightMap(m_heightMap, -340.f / 4000, -1570.f / 4000) - 40.f, -1570.f);
+	modelStack.Rotate(-20, 0, 0, 1);
+	modelStack.Scale(30.0f, 30.f, 30.f);
+	RenderMesh(meshList[GEO_TREE], true);
+	modelStack.PopMatrix(); 
+	
+	modelStack.PushMatrix();
+	modelStack.Translate(-80.f, 350.f * ReadHeightMap(m_heightMap, -80.f / 4000, -1810.f / 4000) - 40.f, -1810.f);
+	modelStack.Rotate(-20, 0, 0, 1);
+	modelStack.Scale(30.0f, 30.f, 30.f);
+	RenderMesh(meshList[GEO_TREE], true);
+	modelStack.PopMatrix();
+
+	//modelStack.PushMatrix();
+	//modelStack.Translate(-20, 0, -20);
+	//RenderMesh(meshList[GEO_OBJECT], false);
+	//modelStack.PopMatrix();
+	//
+	//modelStack.PushMatrix();
+	//modelStack.Translate(-20, 0, -20);
+	//RenderMesh(meshList[GEO_OBJECT], false);
+	//modelStack.PopMatrix();
+	//
+	//modelStack.PushMatrix();
+	//modelStack.Translate(20, 0, -20);
+	//RenderMesh(meshList[GEO_OBJECT], true);
+	//modelStack.PopMatrix();
+
+	//modelStack.PushMatrix();
+	//modelStack.Translate(-725.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000) + 100.f, 545.f);
+	////modelStack.Scale(10, 10, 10);
+	//RenderMesh(meshList[GEO_COTTAGE], false);
+	//modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(-160.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000), -120.f);
+	modelStack.Scale(5, 5, 5);
+	RenderMesh(meshList[GEO_CAMPFIRE], true);
+	modelStack.PopMatrix();
+
+	modelStack.PushMatrix();
+	modelStack.Translate(-160.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000) + 20.f, -120.f);
+	modelStack.Scale(60, 60, 60);
 	RenderMesh(meshList[GEO_FIRE], false);
 	modelStack.PopMatrix();
 
@@ -815,7 +1018,7 @@ void SceneText::Render()
 	
 	std::ostringstream ss1;
 	ss1.precision(4);
-	ss1 << "Light(" << lights[0].position.x << ", " << lights[0].position.y << ", " << lights[0].position.z << ")";
+	ss1 << "Light0(" << lights[0].position.x << ", " << lights[0].position.y << ", " << lights[0].position.z << ")";
 	RenderTextOnScreen(meshList[GEO_TEXT], ss1.str(), Color(0, 1, 0), 3, 0, 3);
 
 	RenderTextOnScreen(meshList[GEO_TEXT], "Hello Screen", Color(0, 1, 0), 3, 0, 0);
