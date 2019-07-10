@@ -8,6 +8,7 @@
 #include "Mesh.h"
 #include "MatrixStack.h"
 #include "Light.h"
+#include "SpriteAnimation.h"
 
 #include <vector>
 
@@ -38,7 +39,7 @@ class SceneText : public Scene
 		U_LIGHT0_COSCUTOFF,
 		U_LIGHT0_COSINNER,
 		U_LIGHT0_EXPONENT, // 17 
-		
+
 		U_LIGHT1_TYPE,
 		U_LIGHT1_POSITION,
 		U_LIGHT1_COLOR,
@@ -58,7 +59,7 @@ class SceneText : public Scene
 		// colortextureenabled lasts for 56 to (56 + 7)
 		U_COLOR_TEXTURE = U_COLOR_TEXTURE_ENABLED + MAX_TEXTURES,
 		// colortexture takes up 64 to (64 + 7)
-		
+
 		U_COLOR = U_COLOR_TEXTURE + MAX_TEXTURES,
 
 		U_TEXT_ENABLED,
@@ -94,6 +95,7 @@ class SceneText : public Scene
 		GEO_GRASS_LIGHTGREEN,
 		GEO_OBJECT,
 		GEO_TEXT,
+		GEO_FIRE,
 		//TSL
 		GEO_SKYPLANE,
 		GEO_TERRAIN,
@@ -102,7 +104,7 @@ class SceneText : public Scene
 
 		NUM_GEOMETRY,
 
-		
+
 	};
 public:
 	SceneText();
@@ -118,10 +120,11 @@ public:
 
 	void RenderText(Mesh* mesh, std::string text, Color color);
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
-	void RenderMeshIn2D(Mesh *mesh, bool enableLight, float size=1.0f, float x=0.0f, float y=0.0f);
+	void RenderMeshIn2D(Mesh *mesh, bool enableLight, float size = 1.0f, float x = 0.0f, float y = 0.0f);
 	void RenderMesh(Mesh *mesh, bool enableLight);
 	void RenderGround();
 	void RenderSkybox();
+	//void RenderFire();
 
 	void RenderSkyPlane();
 	void RenderTerrain();
@@ -146,6 +149,7 @@ private:
 	std::vector<unsigned char> m_heightMap;
 
 	float fps;
+	SpriteAnimation * fireanim;
 };
 
 #endif
