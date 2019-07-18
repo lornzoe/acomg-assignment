@@ -6,6 +6,7 @@ ParticleObject::ParticleObject(GameObject::GAMEOBJECT_TYPE typeValue = GameObjec
 	rotation(0.f),
 	rotationspeed(0.f)
 {
+	// w/e
 }
 
 ParticleObject::~ParticleObject()
