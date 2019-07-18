@@ -27,6 +27,7 @@ public:
 
 	bool b_isAnimation;
 	bool b_isBillboard;
+	bool b_isAffectedByGravity;
 
 	//bool b_isCollidable;
 	// also maybe insert in future: collision comoponent pointer.
@@ -35,12 +36,13 @@ public:
 	~GameObject();
 
 	static void SetPlayerPosition(Vector3 &v_newPosition); // use only when initialising
-	static bool UpdatePlayerPosition(Vector3 v_newPosition);
-
+	static void PlayerHasMoved();
+	static bool HasPlayerMoved();
+	static void ResetPlayerHasMoved();
 	static void SetGravity(Vector3 v_newGravity);
 private: // we don't want to touch these values through a member.
 	static Vector3 * s_v_playerPos; // pointer to the player camera's position.
-
+	static bool s_b_playerHasMoved;
 	static Vector3 s_v_gravity;
 };
 
