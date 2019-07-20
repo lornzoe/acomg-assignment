@@ -176,6 +176,8 @@ void SceneText::Init()
 
 	watertranslate = 0.f;
 
+	i_particleCount = 0;
+
 	for(int i = 0; i < NUM_GEOMETRY; ++i)
 	{
 		meshList[i] = NULL;
@@ -221,24 +223,29 @@ void SceneText::Init()
 	meshList[GEO_WATER]->textureArray[0] = LoadTGA("Image//sea.tga");
 
 
-	meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 1, 6);
-	meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//Fire.tga");
+	meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 6, 6);
+	meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//fire2.tga");
 	fireanim = dynamic_cast<SpriteAnimation*>(meshList[GEO_FIRE]);
 	if (fireanim)
 	{
 		fireanim->m_anim = new Animation();
-		fireanim->m_anim->Set(0, 5, 1, 1.f, true);
+		fireanim->m_anim->Set(0, 35, 1, 1.f, true);
 	}
-
 
 	meshList[GEO_CAMPFIRE] = MeshBuilder::GenerateOBJ("Campfire", "OBJ//Campfire.obj");
 	meshList[GEO_CAMPFIRE]->textureArray[0] = LoadTGA("Image//Campfire.tga");
+
+	meshList[GEO_BILLBOARD_TREE] = MeshBuilder::GenerateQuad("treeX", Color(1, 0, 1), 150.f);
+	meshList[GEO_BILLBOARD_TREE]->textureArray[0] = LoadTGA("Image//treeX.tga");
+
+	meshList[GEO_PARTICLE_WATER] = MeshBuilder::GenerateQuad("WaterParticle", Color(1, 1, 1), 150.f);
+	meshList[GEO_PARTICLE_WATER]->textureArray[0] = LoadTGA("Image//particle.tga");
 
 	// Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
 	Mtx44 perspective;
 	//perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
 	//perspective.SetToOrtho(-80, 80, -60, 60, -1000, 1000);
-	perspective.SetToPerspective(75.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
+	perspective.SetToPerspective(45.0f, 16.0f / 9.0f, 0.1f, 10000.0f);
 
 	projectionStack.LoadMatrix(perspective);
 	
@@ -475,6 +482,11 @@ void SceneText::Update(double dt)
 	else if(Application::IsKeyPressed('9'))
 	{
 		bLightEnabled = false;
+	}
+	if (Application::IsKeyPressed('0'))
+	{
+		ParticleObject * derp = GetParticle();
+		cout << "derp created, there's " << i_particleCount << " active particles now\n";
 	}
 
 	//if(Application::IsKeyPressed('I'))
@@ -1035,4 +1047,59 @@ void SceneText::Exit()
 	}
 	glDeleteProgram(m_programID);
 	glDeleteVertexArrays(1, &m_vertexArrayID);
+}
+
+void SceneText::UpdateParticles(double dt)
+{
+	if (i_particleCount < MAX_PARTICLE)
+	{
+		ParticleObject * particle = GetParticle();
+		particle->e_goType = GEO_SAMPLEOBJ;
+		particle->v_scale.Set(15, 15, 15);
+		particle->v_vel.Set(1, 1, 1);
+		particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
+		particle->v_pos.Set(Math::RandFloatMinMax(-1700, 1700), 1200.f, Math::RandFloatMinMax(-1700, 1700));
+	}
+
+	{
+		for (std::vector<ParticleObject*>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
+		{
+			ParticleObject * particle = (ParticleObject*)*it;
+			
+			if (particle->b_active)
+			{
+				if (particle->e_goType == GEO_SAMPLEOBJ)
+				{
+					particle->v_vel += GameObject::s_v_gravity * (float)dt;
+					particle->v_pos += particle->v_vel * (float)dt * 10.f;
+					particle->rotation += particle->rotationspeed* float(dt);
+				}
+			}
+		}
+	}
+}
+
+ParticleObject * SceneText::GetParticle(void)
+{
+	for (std::vector<ParticleObject *>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
+	{
+		ParticleObject *particle = (ParticleObject*)*it;
+		if (!particle->b_active)
+		{
+			particle->b_active = true;
+			i_particleCount++;
+			return particle;
+		}
+	}
+
+	for (unsigned i = 0; i < 10; ++i)
+	{
+		ParticleObject *particle = new ParticleObject(GEO_SAMPLEOBJ);
+		m_poList.push_back(particle);
+	}
+
+	ParticleObject *particle = m_poList.back();
+	particle->b_active = true;
+	i_particleCount++;
+	return particle;
 }

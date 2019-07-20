@@ -9,10 +9,12 @@
 #include "MatrixStack.h"
 #include "Light.h"
 #include "SpriteAnimation.h"
-
+#include "ParticleObject.h"
+#include "GeoType.h"
 #include <vector>
 
 #define LIGHTCOUNT 2
+#define MAX_PARTICLE 1000
 #define NUMLIGHTCUTOFF 7 + LIGHTCOUNT * 12
 
 class SceneText : public Scene
@@ -74,48 +76,7 @@ class SceneText : public Scene
 
 		U_TOTAL,
 	};
-	enum GEOMETRY_TYPE
-	{
-		GEO_AXES,
-		GEO_CROSSHAIR,
-		GEO_LIGHTBALL,
-		GEO_SPHERE,
-		GEO_SPHERE2,
-		GEO_SPHERE3,
-		GEO_SPHERE4,
-		GEO_SPHERE5,
-		GEO_SPHERE6,
-		GEO_SPHERE7,
-		GEO_SPHERE8,
-		GEO_SPHERE9,
-		GEO_QUAD,
-		GEO_CUBE,
-		GEO_RING,
-		GEO_CONE,
-		GEO_LEFT,
-		GEO_RIGHT,
-		GEO_TOP,
-		GEO_BOTTOM,
-		GEO_FRONT,
-		GEO_BACK,
-		GEO_GRASS_DARKGREEN,
-		GEO_GRASS_LIGHTGREEN,
-		GEO_OBJECT,
-		GEO_TEXT,
-		GEO_FIRE,
-		GEO_CAMPFIRE,
-		//GEO_COTTAGE,
-		GEO_FENCE,
-		//TSL
-		GEO_SKYPLANE,
-		GEO_TERRAIN,
-		GEO_WATER,
-		GEO_TREE,
 
-		NUM_GEOMETRY,
-
-
-	};
 public:
 	SceneText();
 	~SceneText();
@@ -127,6 +88,9 @@ public:
 	virtual void Update(double dt);
 	virtual void Render();
 	virtual void Exit();
+
+	void UpdateParticles(double dt);
+	ParticleObject * GetParticle(void);
 
 	void RenderText(Mesh* mesh, std::string text, Color color);
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
@@ -166,6 +130,10 @@ private:
 	Color fogColor;
 	float fogDensity;
 	float fogStart, fogEnd;
+
+	std::vector<GameObject *> m_goList;
+	std::vector<ParticleObject *> m_poList;
+	int i_particleCount;
 };
 
 #endif
