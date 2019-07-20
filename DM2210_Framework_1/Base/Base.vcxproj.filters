@@ -131,6 +131,9 @@
     <ClInclude Include="Source\ParticleObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\GeoType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Blending.fragmentshader">

@@ -37,6 +37,7 @@
     <ClInclude Include="Source\CameraAss.h" />
     <ClInclude Include="Source\GameObject.h" />
     <ClInclude Include="Source\Geometry.h" />
+    <ClInclude Include="Source\GeoType.h" />
     <ClInclude Include="Source\Light.h" />
     <ClInclude Include="Source\LoadHmap.h" />
     <ClInclude Include="Source\LoadOBJ.h" />
