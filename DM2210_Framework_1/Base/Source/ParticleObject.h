@@ -10,6 +10,6 @@ public:
 	float rotation; // rotation of particle
 	float rotationspeed; // rotational speed of the particle
 
-	ParticleObject(GameObject::GAMEOBJECT_TYPE);
+	ParticleObject(GEOMETRY_TYPE);
 	~ParticleObject();
 };

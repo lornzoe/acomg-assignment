@@ -1,6 +1,6 @@
-#include "ParticleObject.h"
+	#include "ParticleObject.h"
 
-ParticleObject::ParticleObject(GameObject::GAMEOBJECT_TYPE typeValue = GameObject::GO_NIL) // defaults to a nil
+ParticleObject::ParticleObject(GEOMETRY_TYPE typeValue = GEO_SAMPLEOBJ) // defaults to a nil
 	: GameObject(typeValue),
 	f_lifespan(0.f),
 	rotation(0.f),
