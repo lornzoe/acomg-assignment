@@ -486,7 +486,7 @@ void SceneText::Update(double dt)
 	if (Application::IsKeyPressed('0'))
 	{
 		ParticleObject * derp = GetParticle();
-		cout << "derp created, there's " << i_particleCount << " active particles now\n";
+		cout << "there's " << i_particleCount << " active particles now\n";
 	}
 
 	//if(Application::IsKeyPressed('I'))
@@ -608,6 +608,8 @@ void SceneText::Update(double dt)
 		fireanim->Update(dt);
 		fireanim->m_anim->animActive = true;
 	}
+
+	UpdateParticles(dt);
 }
 
 void SceneText::RenderText(Mesh* mesh, std::string text, Color color)
@@ -794,6 +796,22 @@ void SceneText::RenderGround()
 		}
 	}
 	modelStack.PopMatrix();
+}
+
+void SceneText::RenderParticle(ParticleObject * particle)
+{
+	switch (particle->e_goType)
+	{
+	case GEO_PARTICLE_WATER:
+		modelStack.PushMatrix();
+		modelStack.Translate(particle->v_pos.x, particle->v_pos.y, particle->v_pos.z);
+		modelStack.Rotate(Math::RadianToDegree(atan2(camera.position.x - particle->v_pos.x, camera.position.z - particle->v_pos.z)), 0, 1, 0);
+		modelStack.Rotate(particle->rotation, 0, 0, 1);
+		modelStack.Scale(particle->v_scale.x, particle->v_scale.y, particle->v_scale.z);
+		RenderMesh(meshList[particle->e_goType], false);
+		modelStack.PopMatrix();
+		break;
+	}
 }
 
 void SceneText::RenderTerrain()
@@ -1013,6 +1031,13 @@ void SceneText::Render()
 	RenderMesh(meshList[GEO_FIRE], false);
 	modelStack.PopMatrix();
 
+	for (vector<ParticleObject*>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
+	{
+		ParticleObject *particle = (ParticleObject*)*it;
+		if (particle->b_active)
+			RenderParticle(particle);
+	}
+
 	modelStack.PushMatrix();
 	modelStack.Scale(10, 10, 10);
 	//RenderText(meshList[GEO_TEXT], "Hello World", Color(0, 1, 0));
@@ -1054,11 +1079,13 @@ void SceneText::UpdateParticles(double dt)
 	if (i_particleCount < MAX_PARTICLE)
 	{
 		ParticleObject * particle = GetParticle();
-		particle->e_goType = GEO_SAMPLEOBJ;
-		particle->v_scale.Set(15, 15, 15);
+		particle->e_goType = GEO_PARTICLE_WATER;
+		particle->v_scale.Set(1, 1, 1);
 		particle->v_vel.Set(1, 1, 1);
 		particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
-		particle->v_pos.Set(Math::RandFloatMinMax(-1700, 1700), 1200.f, Math::RandFloatMinMax(-1700, 1700));
+		particle->v_pos.Set(Math::RandFloatMinMax(-1700, 1700), 750.f, Math::RandFloatMinMax(-1700, 1700));
+		cout << "particle is at " << particle->v_pos << '\n';
+
 	}
 
 	{
@@ -1068,11 +1095,17 @@ void SceneText::UpdateParticles(double dt)
 			
 			if (particle->b_active)
 			{
-				if (particle->e_goType == GEO_SAMPLEOBJ)
+				if (particle->e_goType == GEO_PARTICLE_WATER)
 				{
 					particle->v_vel += GameObject::s_v_gravity * (float)dt;
 					particle->v_pos += particle->v_vel * (float)dt * 10.f;
 					particle->rotation += particle->rotationspeed* float(dt);
+
+					if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z))
+					{
+						particle->b_active = false;
+						i_particleCount--;
+					}
 				}
 			}
 		}
@@ -1094,7 +1127,7 @@ ParticleObject * SceneText::GetParticle(void)
 
 	for (unsigned i = 0; i < 10; ++i)
 	{
-		ParticleObject *particle = new ParticleObject(GEO_SAMPLEOBJ);
+		ParticleObject *particle = new ParticleObject(GEO_PARTICLE_WATER);
 		m_poList.push_back(particle);
 	}
 

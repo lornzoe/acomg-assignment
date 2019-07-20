@@ -98,6 +98,7 @@ public:
 	void RenderMesh(Mesh *mesh, bool enableLight);
 	void RenderGround();
 	void RenderSkybox();
+	void RenderParticle(ParticleObject*);
 	//void RenderFire();
 
 	void RenderSkyPlane();
