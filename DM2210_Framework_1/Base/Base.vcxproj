@@ -60,6 +60,7 @@
     <None Include="Shader\comg.vertexshader" />
     <None Include="Shader\Fog.fragmentshader" />
     <None Include="Shader\Fog.vertexshader" />
+    <None Include="Shader\Fog2.fragmentshader" />
     <None Include="Shader\LightSource.fragmentshader" />
     <None Include="Shader\MultiLight.fragmentshader" />
     <None Include="Shader\MultiTexture.fragmentshader" />

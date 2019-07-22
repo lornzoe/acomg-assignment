@@ -38,6 +38,9 @@ void SceneText::Init()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	 
+	glAlphaFunc(GL_GREATER, 0.5);
+	glEnable(GL_ALPHA_TEST);
+
 	glGenVertexArrays(1, &m_vertexArrayID);
 	glBindVertexArray(m_vertexArrayID);
 
@@ -937,10 +940,10 @@ void SceneText::Render()
 	//modelStack.PopMatrix();
 
 	// Render LightBall
-	modelStack.PushMatrix();
-	modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
-	RenderMesh(meshList[GEO_LIGHTBALL], false);
-	modelStack.PopMatrix();
+	//modelStack.PushMatrix();
+	//modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
+	//RenderMesh(meshList[GEO_LIGHTBALL], false);
+	//modelStack.PopMatrix();
 
 	RenderGround();
 	//RenderSkybox();
@@ -1080,7 +1083,7 @@ void SceneText::UpdateParticles(double dt)
 	{
 		ParticleObject * particle = GetParticle();
 		particle->e_goType = GEO_PARTICLE_WATER;
-		particle->v_scale.Set(1, 1, 1);
+		particle->v_scale.Set(0.5f, 0.5f, 0.5f);
 		particle->v_vel.Set(1, 1, 1);
 		particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
 		particle->v_pos.Set(Math::RandFloatMinMax(-1700, 1700), 750.f, Math::RandFloatMinMax(-1700, 1700));

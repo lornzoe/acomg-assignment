@@ -171,30 +171,28 @@ void main(){
 		else
 		{
 			int texCount = 0;
-			color = vec4(0, 0, 0, 0);
+			vec4 acolor = vec4(0, 0, 0, 0);
 
 			for(int i = 0; i < MAX_TEXTURES; ++i)
 			{
 				if(colorTextureEnabled[i] == true)
 				{
-					color += texture2D(colorTexture[i], texCoord);
+					acolor += texture2D(colorTexture[i], texCoord);
 					++texCount;
 				}
 			}
 			if(texCount > 0)
 			{
-				color = color/texCount;
-
-				if (color.a < 0.5)
+				acolor = acolor/texCount;
+				if (acolor.a <0.5)
 					discard;
 			}
 			else
 			{
-				color = vec4(fragmentColor, 1);
+				acolor = vec4(fragmentColor, 1);
 			}
+			color = acolor;
 		}
-
-		
 	}
 	if(fogParam.enabled)
 	{
