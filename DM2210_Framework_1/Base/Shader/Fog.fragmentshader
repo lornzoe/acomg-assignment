@@ -185,7 +185,7 @@ void main(){
 			{
 				color = color/texCount;
 				
-				// alpha check; we need to prevent fragments from being written entirely if they're transparent
+				// simple alpha check; we need to prevent fragments from being written entirely if they're transparent
 				if (color.a < 0.5)
 					discard;
 			}
