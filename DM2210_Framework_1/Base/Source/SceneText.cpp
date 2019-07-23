@@ -242,7 +242,7 @@ void SceneText::Init()
 	meshList[GEO_BILLBOARD_TREE]->textureArray[0] = LoadTGA("Image//treeX.tga");
 
 	meshList[GEO_PARTICLE_WATER] = MeshBuilder::GenerateQuad("WaterParticle", Color(1, 1, 1), 150.f);
-	meshList[GEO_PARTICLE_WATER]->textureArray[0] = LoadTGA("Image//particle.tga");
+	meshList[GEO_PARTICLE_WATER]->textureArray[0] = LoadTGA("Image//treeX.tga");
 
 	// Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
 	Mtx44 perspective;
@@ -1083,7 +1083,7 @@ void SceneText::UpdateParticles(double dt)
 	{
 		ParticleObject * particle = GetParticle();
 		particle->e_goType = GEO_PARTICLE_WATER;
-		particle->v_scale.Set(0.5f, 0.5f, 0.5f);
+		particle->v_scale.Set(1.f, 1.f, 1.f);
 		particle->v_vel.Set(1, 1, 1);
 		particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
 		particle->v_pos.Set(Math::RandFloatMinMax(-1700, 1700), 750.f, Math::RandFloatMinMax(-1700, 1700));
