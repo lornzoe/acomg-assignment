@@ -22,6 +22,7 @@
 #include "SceneTexture.h"
 #include "SceneSkybox.h"
 #include "SceneText.h"
+#include "SceneShadow.h"
 
 GLFWwindow* m_window;
 const unsigned char FPS = 60; // FPS of this game
@@ -84,6 +85,16 @@ bool Application::GetMouseUpdate()
 	mouse_last_y = mouse_current_y;
 
     return false;
+}
+
+int Application::GetWindowWidth()
+{
+	return m_window_width;
+}
+
+int Application::GetWindowHeight()
+{
+	return m_window_height;
 }
 
 Application::Application()
@@ -149,7 +160,7 @@ void Application::Init()
 void Application::Run()
 {
 	//Main Loop
-	Scene *scene = new SceneText();
+	Scene *scene = new SceneShadow();
 	scene->Init();
 
 	m_timer.startTimer();    // Start timer to calculate how long it takes to render this frame
