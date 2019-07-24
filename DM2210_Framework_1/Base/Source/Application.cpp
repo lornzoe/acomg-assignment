@@ -87,6 +87,16 @@ bool Application::GetMouseUpdate()
     return false;
 }
 
+int Application::GetWindowWidth()
+{
+	return m_window_width;
+}
+
+int Application::GetWindowHeight()
+{
+	return m_window_height;
+}
+
 Application::Application()
 {
 }
