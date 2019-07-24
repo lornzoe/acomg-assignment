@@ -1,4 +1,4 @@
-#ifndef SCENE_SHADOW_H
+﻿#ifndef SCENE_SHADOW_H
 #define SCENE_SHADOW_H
 
 #include "Scene.h"
@@ -11,9 +11,10 @@
 #include "SpriteAnimation.h"
 #include "ParticleObject.h"
 #include "GeoType.h"
+#include "DepthFBO.h"
 #include <vector>
 
-#define LIGHTCOUNT 2
+#define LIGHTCOUNT 1
 #define MAX_PARTICLE 1000
 #define NUMLIGHTCUTOFF 7 + LIGHTCOUNT * 12
 
@@ -74,8 +75,18 @@ class SceneShadow : public Scene
 		U_FOG_TYPE,
 		U_FOG_ENABLED,
 
+		U_LIGHT_DEPTH_MVP_GPASS,
+		U_LIGHT_DEPTH_MVP,
+		U_SHADOW_MAP,
+
 		U_TOTAL,
 	};
+
+	enum RENDER_PASS {
+		RENDER_PASS_PRE,
+		RENDER_PASS_MAIN,
+	};
+
 
 public:
 	SceneShadow();
@@ -103,6 +114,10 @@ public:
 
 	void RenderSkyPlane();
 	void RenderTerrain();
+	 
+	void RenderPassGPass();
+	void RenderPassMain();
+	void RenderWorld();
 
 private:
 	unsigned m_vertexArrayID;
@@ -110,7 +125,7 @@ private:
 	unsigned m_programID;
 	unsigned m_parameters[U_TOTAL];
 
-	CameraAssignment camera;
+	Camera3 camera;
 
 	float rotateAngle;
 
@@ -135,6 +150,12 @@ private:
 	std::vector<GameObject *> m_goList;
 	std::vector<ParticleObject *> m_poList;
 	int i_particleCount;
+
+	unsigned m_gPassShaderID;
+	DepthFBO m_lightDepthFBO;
+	Mtx44 m_lightDepthProj;
+	Mtx44 m_lightDepthView;
+	RENDER_PASS m_renderPass;
 };
 
 #endif //scene_shadow
