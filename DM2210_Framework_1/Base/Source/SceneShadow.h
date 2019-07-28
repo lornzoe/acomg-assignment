@@ -13,8 +13,8 @@
 #include "GeoType.h"
 #include "DepthFBO.h"
 #include <vector>
-
-#define LIGHTCOUNT 1
+ 
+#define LIGHTCOUNT 1 // define the number of current lights
 #define MAX_PARTICLE 1000
 #define NUMLIGHTCUTOFF 7 + LIGHTCOUNT * 12
 
@@ -78,6 +78,14 @@ class SceneShadow : public Scene
 		U_LIGHT_DEPTH_MVP_GPASS,
 		U_LIGHT_DEPTH_MVP,
 		U_SHADOW_MAP,
+
+		U_SHADOW_COLOR_TEXTURE,
+		U_SHADOW_COLOR_TEXTURE1,
+		U_SHADOW_COLOR_TEXTURE2,
+
+		U_SHADOW_COLOR_TEXTURE_ENABLED,
+		U_SHADOW_COLOR_TEXTURE_ENABLED1,
+		U_SHADOW_COLOR_TEXTURE_ENABLED2,
 
 		U_TOTAL,
 	};

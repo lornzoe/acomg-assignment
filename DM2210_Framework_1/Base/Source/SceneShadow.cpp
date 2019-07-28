@@ -115,6 +115,13 @@ void SceneShadow::Init()
 
 	m_gPassShaderID = LoadShaders("Shader//GPass.vertexshader", "Shader//GPass.fragmentshader");
 	m_parameters[U_LIGHT_DEPTH_MVP_GPASS] = glGetUniformLocation(m_gPassShaderID, "lightDepthMVP");
+	
+	m_parameters[U_SHADOW_COLOR_TEXTURE_ENABLED] = glGetUniformLocation(m_gPassShaderID, "colorTextureEnabled[0]");
+	m_parameters[U_SHADOW_COLOR_TEXTURE] = glGetUniformLocation(m_gPassShaderID, "colorTexture[0]");
+	m_parameters[U_SHADOW_COLOR_TEXTURE_ENABLED1] =	glGetUniformLocation(m_gPassShaderID, "colorTextureEnabled[1]");
+	m_parameters[U_SHADOW_COLOR_TEXTURE1] =	glGetUniformLocation(m_gPassShaderID, "colorTexture[1]");
+	m_parameters[U_SHADOW_COLOR_TEXTURE_ENABLED2] =	glGetUniformLocation(m_gPassShaderID, "colorTextureEnabled[2]");
+	m_parameters[U_SHADOW_COLOR_TEXTURE2] =	glGetUniformLocation(m_gPassShaderID, "colorTexture[2]");
 
 	// Use our shader
 	glUseProgram(m_programID);
@@ -131,7 +138,7 @@ void SceneShadow::Init()
 	//lights[0].exponent = 3.f;
 	//lights[0].spotDirection.Set(0.f, 1.f, 0.f);
 
-	lights[0].type = Light::LIGHT_POINT;
+	lights[0].type = Light::LIGHT_DIRECTIONAL;
 	lights[0].position.Set(0, 10, 2);
 	lights[0].color.Set(1, 1, 1);
 	lights[0].power = 1;
@@ -273,7 +280,8 @@ void SceneShadow::Init()
 	Mtx44 perspective;
 	//perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
 	//perspective.SetToOrtho(-80, 80, -60, 60, -1000, 1000);
-	perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
+	perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
+
 	projectionStack.LoadMatrix(perspective);
 
 	rotateAngle = 0;
@@ -281,132 +289,7 @@ void SceneShadow::Init()
 	bLightEnabled = true;
 }
 
-//void SceneShadow::InitParameters()
-//{
-//	{
-//		m_parameters[U_NUMLIGHTS] = glGetUniformLocation(m_programID, "numLights");
-//
-//
-//		m_parameters[U_MVP] = glGetUniformLocation(m_programID, "MVP");
-//		m_parameters[U_MODELVIEW] = glGetUniformLocation(m_programID, "MV");
-//		m_parameters[U_MODELVIEW_INVERSE_TRANSPOSE] = glGetUniformLocation(m_programID, "MV_inverse_transpose");
-//		m_parameters[U_MATERIAL_AMBIENT] = glGetUniformLocation(m_programID, "material.kAmbient");
-//		m_parameters[U_MATERIAL_DIFFUSE] = glGetUniformLocation(m_programID, "material.kDiffuse");
-//		m_parameters[U_MATERIAL_SPECULAR] = glGetUniformLocation(m_programID, "material.kSpecular");
-//		m_parameters[U_MATERIAL_SHININESS] = glGetUniformLocation(m_programID, "material.kShininess");
-//
-//		//init light parameters
-//		for (int i = 0; i < LIGHTCOUNT; i++)
-//		{
-//
-//			cout << "LIGHT " << i << " :" << endl;
-//
-//			string thestring = "lights[" + to_string(i) + "].position_cameraspace";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 7] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 7 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].color";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 8] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 8 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].power";
-//			{
-//				const char *c_str = thestring.c_str();
-//
-//				m_parameters[i * 12 + 9] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 9 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].kC";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 10] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 10 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].kL";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 11] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 11 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].kQ";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 12] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 12 << "] " << thestring << endl;
-//			}
-//			if (i > 0)
-//				thestring = "light" + to_string(i) + "Enabled";
-//			else
-//				thestring = "lightEnabled";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 13] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].type";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 14] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 14 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].spotDirection";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 15] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 15 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].cosCutoff";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 16] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 16 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].cosInner";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 17] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 17 << "] " << thestring << endl;
-//			}
-//			thestring = "lights[" + to_string(i) + "].exponent";
-//			{
-//				const char *c_str = thestring.c_str();
-//				m_parameters[i * 12 + 18] = glGetUniformLocation(m_programID, c_str);
-//				cout << "- [" << i * 12 + 18 << "] " << thestring << endl;
-//			}
-//
-//			cout << "==============" << endl;
-//		}
-//		cout << "NUMLIGHTCUTOFF VALUE: " << NUMLIGHTCUTOFF << endl;
-//
-//		glUniform1i(m_parameters[U_NUMLIGHTS], LIGHTCOUNT);
-//		glEnable(GL_DEPTH_TEST);
-//
-//		// passing uniform parameters after glUseProgram()
-//		for (int i = 0; i < LIGHTCOUNT; i++)
-//		{
-//			glUniform1i(m_parameters[i * 12 + 14], lights[i].type);
-//			glUniform3fv(m_parameters[i * 12 + 8], 1, &lights[i].color.r);
-//			glUniform1f(m_parameters[i * 12 + 9], lights[i].power);
-//			glUniform1f(m_parameters[i * 12 + 10], lights[i].kC);
-//			glUniform1f(m_parameters[i * 12 + 11], lights[i].kL);
-//			glUniform1f(m_parameters[i * 12 + 12], lights[i].kQ);
-//			glUniform1f(m_parameters[i * 12 + 16], lights[i].cosCutoff);
-//			glUniform1f(m_parameters[i * 12 + 17], lights[i].cosInner);
-//			glUniform1f(m_parameters[i * 12 + 18], lights[i].exponent);
-//		};
-//
-//		// init other non-light parameters here
-//		m_parameters[U_COLOR_TEXTURE_ENABLED] = glGetUniformLocation(m_programID, "colorTextureEnabled");
-//		m_parameters[U_COLOR_TEXTURE] = glGetUniformLocation(m_programID, "colorTexture");
-//		m_parameters[U_TEXT_ENABLED] = glGetUniformLocation(m_programID, "textEnabled");
-//		m_parameters[U_TEXT_COLOR] = glGetUniformLocation(m_programID, "textColor");
-//
-//	}
-//}
+
 
 void SceneShadow::InitMeshList()
 {
@@ -532,82 +415,6 @@ void SceneShadow::Update(double dt)
 	if(Application::IsKeyPressed('P'))
 		lights[0].position.y += (float)(10.f * dt);
 
-	//if (Application::IsKeyPressed('M'))
-	//{
-	//	lights[0].power += (float)(10.f * dt);
-	//	glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
-
-	//}
-	//if (Application::IsKeyPressed('N'))
-	//{
-	//	lights[0].power -= (float)(10.f * dt);
-	//	glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
-	//}
-
-	//if (Application::IsKeyPressed('Z'))
-	//{
-	//	glUniform1i(m_parameters[U_FOG_ENABLED], 0);
-	//}
-	//else if (Application::IsKeyPressed('X'))
-	//{
-	//	glUniform1i(m_parameters[U_FOG_ENABLED], 1);
-	//}
-
-	//if (Application::IsKeyPressed(VK_RETURN))
-	//{
-	//	cout << camera.position.x << ',' << camera.position.z << '\n';
-	//}
-	//if (Application::IsKeyPressed('O'))
-	//{
-	//	/*fogDensity += dt;
-	//	cout << "adding to fog density, it's now : " << fogDensity << '\n';
-	//	glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);*/
-
-	//	fogDensity = 10.f;
-	//	cout << "forced fogdensity to value of " << fogDensity << '\n';
-	//	glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
-
-	//}
-	//if (Application::IsKeyPressed('P'))
-	//{
-	//	/*fogDensity -= dt;
-	//	if (fogDensity < 0.f)
-	//		fogDensity = 0.f;
-	//	cout << "reducing to fog density, it's now : " << fogDensity << '\n';*/
-	//	fogDensity = 1.f;
-	//	cout << "forced fogdensity to value of " << fogDensity << '\n';
-
-	//	glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
-	//}
-	//if (Application::IsKeyPressed('K'))
-	//{
-
-	//	fogStart += 10.f * dt;
-	//	fogEnd += 10.f * dt;
-	//	glUniform1f(m_parameters[U_FOG_START], fogStart);
-	//	glUniform1f(m_parameters[U_FOG_END], fogEnd);
-
-	//}
-	//if (Application::IsKeyPressed('L'))
-	//{
-
-	//	fogStart -= 10.f * dt;
-	//	fogEnd -= 10.f * dt;
-	//	glUniform1f(m_parameters[U_FOG_START], fogStart);
-	//	glUniform1f(m_parameters[U_FOG_END], fogEnd);
-
-	//}
-
-	/*if (camera.position.y < 80.f)
-	{
-		fogColor.Set(0, 0, 1.f);
-		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
-	}
-	else
-	{
-		fogColor.Set(0.79f, 0.84f, 0.85f);
-		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
-	}*/
 
 	if (Application::IsKeyPressed('C'))
 	{
@@ -756,6 +563,20 @@ void SceneShadow::RenderMesh(Mesh *mesh, bool enableLight)
 
 	if (m_renderPass == RENDER_PASS_PRE)
 	{
+		for (int i = 0; i < MAX_TEXTURES; ++i)
+		{
+			if (mesh->textureArray[i] > 0)
+			{
+				glUniform1i(m_parameters[U_SHADOW_COLOR_TEXTURE_ENABLED
+					+ i], 1);
+				glActiveTexture(GL_TEXTURE0 + i);
+				glBindTexture(GL_TEXTURE_2D, mesh->textureArray[i]);
+				glUniform1i(m_parameters[U_SHADOW_COLOR_TEXTURE + i], i);
+			}
+			else
+				glUniform1i(m_parameters[U_SHADOW_COLOR_TEXTURE_ENABLED+ i], 0);
+		}
+
 		Mtx44 lightDepthMVP = m_lightDepthProj * m_lightDepthView * modelStack.Top();
 		glUniformMatrix4fv(m_parameters[U_LIGHT_DEPTH_MVP_GPASS], 1, GL_FALSE,
 			&lightDepthMVP.a[0]);
