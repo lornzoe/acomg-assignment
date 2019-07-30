@@ -6,7 +6,7 @@ bool GameObject::s_b_playerHasMoved = false;
 
 Vector3 GameObject::s_v_gravity = Vector3(0.f, -9.8f, 0.f);
 
-GameObject::GameObject(GEOMETRY_TYPE typeValue = GEO_SAMPLEOBJ)
+GameObject::GameObject(GEOMETRY_TYPE typeValue )
 	: b_active(false),
 	e_goType(typeValue),
 	v_pos(0, 0, 0),
