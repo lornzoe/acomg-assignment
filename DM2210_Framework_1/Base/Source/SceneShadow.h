@@ -88,6 +88,10 @@ class SceneShadow : public Scene
 		U_SHADOW_COLOR_TEXTURE_ENABLED1,
 		U_SHADOW_COLOR_TEXTURE_ENABLED2,
 
+		U_TEXTURE_ISWATER,
+		
+		U_TEXTURE_ISSKY,
+		U_TEXTURE_DAYDISTRIBUTION,
 		U_TOTAL,
 	};
 
@@ -171,6 +175,8 @@ private:
 	RENDER_PASS m_renderPass;
 
 	DayNightCycler m_dayNightCycler;
+
+	float f_skyPanning;
 };
 
 #endif //scene_shadow

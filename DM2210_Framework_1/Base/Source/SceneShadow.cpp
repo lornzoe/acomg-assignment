@@ -102,6 +102,9 @@ void SceneShadow::Init()
 
 	m_parameters[U_LIGHT_DEPTH_MVP] = glGetUniformLocation(m_programID, "lightDepthMVP");
 	m_parameters[U_SHADOW_MAP] = glGetUniformLocation(m_programID, "shadowMap");
+	m_parameters[U_TEXTURE_ISWATER] = glGetUniformLocation(m_programID, "isWater");
+	m_parameters[U_TEXTURE_ISSKY] = glGetUniformLocation(m_programID, "isSkyPlane");
+	m_parameters[U_TEXTURE_DAYDISTRIBUTION] = glGetUniformLocation(m_programID, "dayDistribution");
 
 	m_gPassShaderID = LoadShaders("Shader//GPass.vertexshader", "Shader//GPass.fragmentshader");
 	m_parameters[U_LIGHT_DEPTH_MVP_GPASS] = glGetUniformLocation(m_gPassShaderID, "lightDepthMVP");
@@ -112,6 +115,9 @@ void SceneShadow::Init()
 	m_parameters[U_SHADOW_COLOR_TEXTURE1] =	glGetUniformLocation(m_gPassShaderID, "colorTexture[1]");
 	m_parameters[U_SHADOW_COLOR_TEXTURE_ENABLED2] =	glGetUniformLocation(m_gPassShaderID, "colorTextureEnabled[2]");
 	m_parameters[U_SHADOW_COLOR_TEXTURE2] =	glGetUniformLocation(m_gPassShaderID, "colorTexture[2]");
+
+
+
 
 	// Use our shader
 	glUseProgram(m_programID);
@@ -158,6 +164,9 @@ void SceneShadow::Init()
 	glUniform1f(m_parameters[U_FOG_DENSITY], fogDensity);
 	glUniform1i(m_parameters[U_FOG_TYPE], 1);
 	glUniform1i(m_parameters[U_FOG_ENABLED], 1);
+
+	glUniform1f(m_parameters[U_TEXTURE_ISSKY], 0);
+	glUniform1f(m_parameters[U_TEXTURE_ISWATER], 0);
 
 	watertranslate = 0.f;
 	i_particleCount = 0;
@@ -626,13 +635,15 @@ void SceneShadow::RenderTerrain()
 	RenderMesh(meshList[GEO_TERRAIN], true);
 	modelStack.PopMatrix();
 
-	//modelStack.PushMatrix();
-	//modelStack.Translate(90.f, 80.f, -186.f + watertranslate);
-	//modelStack.Rotate(-90.f, 1.f, 0.f, 0.);
-	////modelStack.Scale(4000.f, 4000.f, 1.f);
-	//modelStack.Scale(50.f, 50.f, 1.f);
-	//RenderMesh(meshList[GEO_WATER], false);
-	//modelStack.PopMatrix();
+	glUniform1i(m_parameters[U_TEXTURE_ISWATER], 1);
+
+	modelStack.PushMatrix();
+	modelStack.Translate(90, 80, -186);
+	modelStack.Rotate(-90, 1, 0, 0);
+	modelStack.Scale(3.f, 5.f, 1.f);
+	RenderMesh(meshList[GEO_WATER], true);
+	modelStack.PopMatrix();
+	glUniform1i(m_parameters[U_TEXTURE_ISWATER], 0);
 
 	//modelStack.PushMatrix();
 	//modelStack.Translate(90.f, 80.f, -106.f + watertranslate);
