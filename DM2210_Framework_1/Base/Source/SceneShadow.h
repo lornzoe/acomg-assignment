@@ -101,15 +101,17 @@ public:
 	~SceneShadow();
 
 	virtual void Init();
-	void InitParameters();
-	void InitMeshList();
 
 	virtual void Update(double dt);
 	virtual void Render();
 	virtual void Exit();
 
+	
 	void UpdateParticles(double dt);
 	ParticleObject * GetParticle(void);
+
+	void UpdateGO(double dt);
+	GameObject * FetchGO(void);
 
 	void RenderText(Mesh* mesh, std::string text, Color color);
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
@@ -126,7 +128,9 @@ public:
 	void RenderPassGPass();
 	void RenderPassMain();
 	void RenderWorld();
+	void RenderOnScreens();
 
+	void RenderGO(GameObject*);
 private:
 	unsigned m_vertexArrayID;
 	Mesh* meshList[NUM_GEOMETRY];
@@ -134,7 +138,6 @@ private:
 	unsigned m_parameters[U_TOTAL];
 
 	Camera3 camera;
-
 	float rotateAngle;
 
 	MS modelStack;
@@ -157,6 +160,7 @@ private:
 
 	std::vector<GameObject *> m_goList;
 	std::vector<ParticleObject *> m_poList;
+	int i_objectCount;
 	int i_particleCount;
 
 	unsigned m_gPassShaderID;

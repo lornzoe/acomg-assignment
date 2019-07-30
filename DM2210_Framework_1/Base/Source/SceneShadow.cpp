@@ -66,17 +66,7 @@ void SceneShadow::Init()
 	m_parameters[U_LIGHT0_COSCUTOFF] = glGetUniformLocation(m_programID, "lights[0].cosCutoff");
 	m_parameters[U_LIGHT0_COSINNER] = glGetUniformLocation(m_programID, "lights[0].cosInner");
 	m_parameters[U_LIGHT0_EXPONENT] = glGetUniformLocation(m_programID, "lights[0].exponent");
-	//m_parameters[U_LIGHT1_TYPE] = glGetUniformLocation(m_programID, "lights[1].type");
-	//m_parameters[U_LIGHT1_POSITION] = glGetUniformLocation(m_programID, "lights[1].position_cameraspace");
-	//m_parameters[U_LIGHT1_COLOR] = glGetUniformLocation(m_programID, "lights[1].color");
-	//m_parameters[U_LIGHT1_POWER] = glGetUniformLocation(m_programID, "lights[1].power");
-	//m_parameters[U_LIGHT1_KC] = glGetUniformLocation(m_programID, "lights[1].kC");
-	//m_parameters[U_LIGHT1_KL] = glGetUniformLocation(m_programID, "lights[1].kL");
-	//m_parameters[U_LIGHT1_KQ] = glGetUniformLocation(m_programID, "lights[1].kQ");
-	//m_parameters[U_LIGHT1_SPOTDIRECTION] = glGetUniformLocation(m_programID, "lights[1].spotDirection");
-	//m_parameters[U_LIGHT1_COSCUTOFF] = glGetUniformLocation(m_programID, "lights[1].cosCutoff");
-	//m_parameters[U_LIGHT1_COSINNER] = glGetUniformLocation(m_programID, "lights[1].cosInner");
-	//m_parameters[U_LIGHT1_EXPONENT] = glGetUniformLocation(m_programID, "lights[1].exponent");
+
 	// Get a handle for our "colorTexture" uniform
 	m_parameters[U_COLOR_TEXTURE_ENABLED] = glGetUniformLocation(m_programID, "colorTextureEnabled[0]");
 	m_parameters[U_COLOR_TEXTURE] = glGetUniformLocation(m_programID, "colorTexture[0]");
@@ -126,18 +116,6 @@ void SceneShadow::Init()
 	// Use our shader
 	glUseProgram(m_programID);
 
-	//lights[0].type = Light::LIGHT_POINT;
-	//lights[0].position.Set(0, 20, 0);
-	//lights[0].color.Set(1, 1, 1);
-	//lights[0].power = 1.f;
-	//lights[0].kC = 1.f;
-	//lights[0].kL = 0.01f;
-	//lights[0].kQ = 0.001f;
-	//lights[0].cosCutoff = cos(Math::DegreeToRadian(45));
-	//lights[0].cosInner = cos(Math::DegreeToRadian(30));
-	//lights[0].exponent = 3.f;
-	//lights[0].spotDirection.Set(0.f, 1.f, 0.f);
-
 	lights[0].type = Light::LIGHT_DIRECTIONAL;
 	lights[0].position.Set(0, 10, 2);
 	lights[0].color.Set(1, 1, 1);
@@ -149,17 +127,6 @@ void SceneShadow::Init()
 	lights[0].cosInner = cos(Math::DegreeToRadian(30));
 	lights[0].exponent = 3.f;
 	lights[0].spotDirection.Set(0.f, 1.f, 0.f);
-
-	/*lights[1].type = Light::LIGHT_DIRECTIONAL;
-	lights[1].position.Set(1, 1, 0);
-	lights[1].color.Set(1, 1, 0.5f);
-	lights[1].power = 0.0f;*/
-	//lights[1].kC = 1.f;
-	//lights[1].kL = 0.01f;
-	//lights[1].kQ = 0.001f;
-	//lights[1].cosCutoff = cos(Math::DegreeToRadian(45));
-	//lights[1].cosInner = cos(Math::DegreeToRadian(30));
-	//lights[1].spotDirection.Set(0.f, 1.f, 0.f);
 
 	glUniform1i(m_parameters[U_NUMLIGHTS], LIGHTCOUNT);
 	glUniform1i(m_parameters[U_TEXT_ENABLED], 0);
@@ -173,16 +140,6 @@ void SceneShadow::Init()
 	glUniform1f(m_parameters[U_LIGHT0_COSCUTOFF], lights[0].cosCutoff);
 	glUniform1f(m_parameters[U_LIGHT0_COSINNER], lights[0].cosInner);
 	glUniform1f(m_parameters[U_LIGHT0_EXPONENT], lights[0].exponent);
-
-	//glUniform1i(m_parameters[U_LIGHT1_TYPE], lights[1].type);
-	//glUniform3fv(m_parameters[U_LIGHT1_COLOR], 1, &lights[1].color.r);
-	//glUniform1f(m_parameters[U_LIGHT1_POWER], lights[1].power);
-	//glUniform1f(m_parameters[U_LIGHT1_KC], lights[1].kC);
-	//glUniform1f(m_parameters[U_LIGHT1_KL], lights[1].kL);
-	//glUniform1f(m_parameters[U_LIGHT1_KQ], lights[1].kQ);
-	//glUniform1f(m_parameters[U_LIGHT1_COSCUTOFF], lights[1].cosCutoff);
-	//glUniform1f(m_parameters[U_LIGHT1_COSINNER], lights[1].cosInner);
-	//glUniform1f(m_parameters[U_LIGHT1_EXPONENT], lights[1].exponent);
 
 	camera.Init(Vector3(0, 0, 10), Vector3(0, 0, 0), Vector3(0, 1, 0));
 
@@ -276,89 +233,35 @@ void SceneShadow::Init()
 	meshList[GEO_LIGHT_DEPTH_QUAD] = MeshBuilder::GenerateQuad("LIGHT_DEPTH_TEXTURE", Color(1, 1, 1), 1.f);
 	meshList[GEO_LIGHT_DEPTH_QUAD]->textureArray[0] = m_lightDepthFBO.GetTexture();
 
-	// Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
-	Mtx44 perspective;
-	//perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
-	//perspective.SetToOrtho(-80, 80, -60, 60, -1000, 1000);
-	perspective.SetToPerspective(45.0f, 4.0f / 3.0f, 0.1f, 10000.0f);
-
-	projectionStack.LoadMatrix(perspective);
-
 	rotateAngle = 0;
 
 	bLightEnabled = true;
-}
 
+	cout << "================\n";
 
-
-void SceneShadow::InitMeshList()
-{
-	for (int i = 0; i < NUM_GEOMETRY; ++i)
+	for (int i = 0; i < 75; ++i)
 	{
-		meshList[i] = NULL;
+		GameObject * go = FetchGO();
+		go->e_goType = GEO_TREE;
+		int rotationamount = Math::RandIntMinMax(0, 359);
+		float xpos, ypos, zpos;
+		do
+		{
+			xpos = Math::RandFloatMinMax(-1800, 1800);
+			zpos = Math::RandFloatMinMax(-1500, 1500);
+			ypos = ReadHeightMap(m_heightMap, xpos / 4000, zpos / 4000) * 350.f;
+		} while (ypos < 90.f);
+
+		float rscale = Math::RandFloatMinMax(30, 50);
+		go->v_scale.Set(rscale, rscale, rscale);
+
+		go->v_dir.y = (float)rotationamount;
+		go->v_pos.Set(xpos, ypos, zpos);
+
+		m_goList.push_back(go);
+		cout << "Pushed back Tree # " << i << " into m_goList.\n";
 	}
-
-	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("reference");
-	meshList[GEO_CROSSHAIR] = MeshBuilder::GenerateCrossHair("crosshair");
-	meshList[GEO_QUAD] = MeshBuilder::GenerateQuad("quad", Color(1, 1, 1), 1.f);
-	meshList[GEO_QUAD]->textureArray[0] = LoadTGA("Image//calibri.tga");
-	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("cube", Color(1, 1, 1), 2);
-	meshList[GEO_CUBE]->material.kDiffuse.Set(0, 1, 1);
-	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
-	meshList[GEO_TEXT]->textureArray[0] = LoadTGA("Image//calibri.tga");
-	meshList[GEO_TEXT]->material.kAmbient.Set(1, 0, 0);
-	meshList[GEO_OBJECT] = MeshBuilder::GenerateOBJ("OBJ1", "OBJ//chair.obj");
-	meshList[GEO_OBJECT]->textureArray[0] = LoadTGA("Image//chair.tga");
-	meshList[GEO_RING] = MeshBuilder::GenerateRing("ring", Color(1, 0, 1), 36, 1, 0.5f);
-	meshList[GEO_LIGHTBALL] = MeshBuilder::GenerateSphere("lightball", Color(1, 1, 1), 18, 36, 1.f);
-	meshList[GEO_SPHERE] = MeshBuilder::GenerateSphere("sphere", Color(1, 0, 0), 18, 36, 10.f);
-	meshList[GEO_CONE] = MeshBuilder::GenerateCone("cone", Color(0.5f, 1, 0.3f), 36, 10.f, 10.f);
-	meshList[GEO_CONE]->material.kDiffuse.Set(0.99f, 0.99f, 0.99f);
-	meshList[GEO_CONE]->material.kSpecular.Set(0.f, 0.f, 0.f);
-	meshList[GEO_SKYPLANE] = MeshBuilder::GenerateSkyPlane("skyplane", Color(1.0f, 0, 0), 128, 200.f, 2100.f, 1, 1);
-	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//sky.tga");
-	//TERRAIN
-	
-	meshList[GEO_TERRAIN] = MeshBuilder::GenerateTerrain("terrain", "Image//heightmap2.raw", m_heightMap);
-	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//grass_darkgreen.tga");
-	meshList[GEO_TERRAIN]->textureArray[1] = LoadTGA("Image//ForestFloor.tga");
-
-	//TREE
-	meshList[GEO_TREE] = MeshBuilder::GenerateOBJ("treeObj", "OBJ//Tree.obj");
-	meshList[GEO_TREE]->textureArray[0] = LoadTGA("Image//Tree.tga");
-	meshList[GEO_TREE]->textureArray[1] = LoadTGA("Image//TreeMoss.tga");
-
-	//WATER
-	meshList[GEO_WATER] = MeshBuilder::GenerateQuad("WaterPlane", Color(0, 0, 0), 150.f);
-	meshList[GEO_WATER]->textureArray[0] = LoadTGA("Image//sea.tga");
-
-
-	// Load the ground mesh and texture
-	meshList[GEO_GRASS_DARKGREEN] = MeshBuilder::GenerateQuad("GRASS_DARKGREEN", Color(1, 0, 1), 1.f);
-	meshList[GEO_GRASS_DARKGREEN]->textureArray[0] = LoadTGA("Image//grass_darkgreen.tga");
-	meshList[GEO_GRASS_LIGHTGREEN] = MeshBuilder::GenerateQuad("GEO_GRASS_LIGHTGREEN", Color(0, 1, 1), 1.f);
-	meshList[GEO_GRASS_LIGHTGREEN]->textureArray[0] = LoadTGA("Image//grass_lightgreen.tga");
-
-	//meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 8, 8);
-	//meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//Fire1.tga");
-	//fireanim = dynamic_cast<SpriteAnimation*>(meshList[GEO_FIRE]);
-	//if (fireanim)
-	//{
-	//	fireanim->m_anim = new Animation();
-	//	fireanim->m_anim->Set(0, 59, 1, 1.f, true);
-	//}
-	meshList[GEO_FIRE] = MeshBuilder::GenerateSpriteAnimation("Fire", 6, 6);
-	meshList[GEO_FIRE]->textureArray[0] = LoadTGA("Image//Fire2.tga");
-	fireanim = dynamic_cast<SpriteAnimation*>(meshList[GEO_FIRE]);
-	if (fireanim)
-	{
-		fireanim->m_anim = new Animation();
-		fireanim->m_anim->Set(0, 35, 1, 0.5f, true);
-	}
-
-	/*meshList[GEO_COTTAGE] = MeshBuilder::GenerateOBJ("cottage", "OBJ//cottagev2.obj");
-	meshList[GEO_COTTAGE]->textureArray[0] = LoadTGA("Image//cottagev2.tga");
-	meshList[GEO_COTTAGE]->textureArray[1] = LoadTGA("Image//cottage1v2.tga");*/
+	cout << "================\n";
 
 }
 
@@ -403,18 +306,30 @@ void SceneShadow::Update(double dt)
 	}
 
 	if(Application::IsKeyPressed('I'))
-		lights[0].position.z -= (float)(10.f * dt);
+		lights[0].position.z -= (float)(50.f * dt);
 	if(Application::IsKeyPressed('K'))
-		lights[0].position.z += (float)(10.f * dt);
+		lights[0].position.z += (float)(50.f * dt);
 	if(Application::IsKeyPressed('J'))
-		lights[0].position.x -= (float)(10.f * dt);
+		lights[0].position.x -= (float)(50.f * dt);
 	if(Application::IsKeyPressed('L'))
-		lights[0].position.x += (float)(10.f * dt);
+		lights[0].position.x += (float)(50.f * dt);
 	if(Application::IsKeyPressed('O'))
-		lights[0].position.y -= (float)(10.f * dt);
+		lights[0].position.y -= (float)(50.f * dt);
 	if(Application::IsKeyPressed('P'))
-		lights[0].position.y += (float)(10.f * dt);
+		lights[0].position.y += (float)(50.f * dt);
 
+	if (Application::IsKeyPressed('M'))
+	{
+		lights[0].power += dt;
+		glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
+	}
+
+
+	if (Application::IsKeyPressed('N'))
+	{
+		lights[0].power -= dt;
+		glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
+	}
 
 	if (Application::IsKeyPressed('C'))
 	{
@@ -432,8 +347,6 @@ void SceneShadow::Update(double dt)
 
 	rotateAngle += (float)(10 * dt);
 	watertranslate += (float)(dt) * 50;
-
-	//lights[0].position.Set(camera.position.x, camera.position.y, camera.position.z);
 
 	camera.Update(dt);
 	//camera.SetCameraY(30 + 350.f * ReadHeightMap(m_heightMap, camera.position.x / 4000, camera.position.z / 4000), dt);
@@ -686,20 +599,20 @@ void SceneShadow::RenderTerrain()
 	RenderMesh(meshList[GEO_TERRAIN], true);
 	modelStack.PopMatrix();
 
-	modelStack.PushMatrix();
-	modelStack.Translate(90.f, 80.f, -186.f + watertranslate);
-	modelStack.Rotate(-90.f, 1.f, 0.f, 0.);
-	//modelStack.Scale(4000.f, 4000.f, 1.f);
-	modelStack.Scale(50.f, 50.f, 1.f);
-	RenderMesh(meshList[GEO_WATER], false);
-	modelStack.PopMatrix();
+	//modelStack.PushMatrix();
+	//modelStack.Translate(90.f, 80.f, -186.f + watertranslate);
+	//modelStack.Rotate(-90.f, 1.f, 0.f, 0.);
+	////modelStack.Scale(4000.f, 4000.f, 1.f);
+	//modelStack.Scale(50.f, 50.f, 1.f);
+	//RenderMesh(meshList[GEO_WATER], false);
+	//modelStack.PopMatrix();
 
-	modelStack.PushMatrix();
-	modelStack.Translate(90.f, 80.f, -106.f + watertranslate);
-	modelStack.Rotate(-90.f, 1.f, 0.f, 0.);
-	//modelStack.Scale(4000.f, 4000.f, 1.f);
-	modelStack.Scale(50.f, 50.f, 1.f);
-	modelStack.PopMatrix();
+	//modelStack.PushMatrix();
+	//modelStack.Translate(90.f, 80.f, -106.f + watertranslate);
+	//modelStack.Rotate(-90.f, 1.f, 0.f, 0.);
+	////modelStack.Scale(4000.f, 4000.f, 1.f);
+	//modelStack.Scale(50.f, 50.f, 1.f);
+	//modelStack.PopMatrix();
 
 }
 
@@ -713,13 +626,36 @@ void SceneShadow::RenderPassGPass()
 	glUseProgram(m_gPassShaderID);
 	//These matrices should change when light position or direction changes
 	if (lights[0].type == Light::LIGHT_DIRECTIONAL)
-		m_lightDepthProj.SetToOrtho(-100, 100, -100, 100, -100, 200); //different
-		//m_lightDepthProj.SetToOrtho(-10, 10, -10, 10, -10, 20); //different
+	{
+		Vector3 lightpos(lights[0].position.x, lights[0].position.y, lights[0].position.z);
+
+		double multiplier = lightpos.LengthSquared();
+		m_lightDepthProj.SetToOrtho(-2 * multiplier, 2 * multiplier, -2 * multiplier, 2 * multiplier, -4 * multiplier, 4 * multiplier); //different
+
+		//if (lightpos.LengthSquared() <= 400)
+		//{
+		//	cout << lightpos.LengthSquared() << " camera type 1\n";
+		//	m_lightDepthProj.SetToOrtho(-10, 10, -10, 10, -10, 20); //different
+		//}
+		//else if (lightpos.LengthSquared() <= 40000)
+		//{
+		//	cout << lightpos.LengthSquared() << " camera type 2\n";
+		//	m_lightDepthProj.SetToOrtho(-100, 100, -100, 100, -100, 200); //different
+
+		//}
+		//else // 4000000
+		//{
+		//	cout << camera.position.LengthSquared() << " camera type 3\n";
+		//	m_lightDepthProj.SetToOrtho(-100, 100, -100, 100, -100, 2000); //different
+
+		//}
+	}
 
 	else
 		m_lightDepthProj.SetToPerspective(90, 1.f, 0.1, 20);
 
 	m_lightDepthView.SetToLookAt(lights[0].position.x, lights[0].position.y, lights[0].position.z, 0, 0, 0, 0, 1, 0);
+	
 	RenderWorld(); // sphere quad plane
 	// House, Trees, particles
 
@@ -775,39 +711,84 @@ void SceneShadow::RenderPassMain()
 	RenderWorld(); // Sphere cube plane
 
 	// Skyplane, terrain, fog, sprites
+	RenderTerrain();
 
 	modelStack.PushMatrix();
 	modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
+	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[GEO_LIGHTBALL], false);
 	modelStack.PopMatrix();
 
 	modelStack.PushMatrix();
 	modelStack.Translate(100, 0, 0);
 	modelStack.Scale(75, 75, 50);
-	RenderMesh(meshList[GEO_LIGHT_DEPTH_QUAD], false); // Red color quad for the shadow map
+	RenderMeshIn2D(meshList[GEO_LIGHT_DEPTH_QUAD], false, 50.f, 0.5f, 0.25f); // Red color quad for the shadow map
 	modelStack.PopMatrix();
+	
+	RenderOnScreens();
 }
 
 void SceneShadow::RenderWorld()
 {
 	// One sphere, One cube -- > Plane = Ground which is used to project the shadow on. //
 	modelStack.PushMatrix();
+	modelStack.Translate(0.f, 150.f, 0.f);
+	modelStack.Scale(10, 10, 10);
 	RenderMesh(meshList[GEO_SPHERE], true);
 	modelStack.PopMatrix();
 
-	modelStack.PushMatrix();
-	modelStack.Translate(0, -25, 0);
-	modelStack.Rotate(-90, 1, 0, 0);
-	modelStack.Scale(40, 40, 40);
-	RenderMesh(meshList[GEO_QUAD], true);
-	modelStack.PopMatrix();
+	for (vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
+	{
+		GameObject *go = (GameObject*)*it;
+		if (go->b_active)
+			RenderGO(go);
+	}
 
-	//modelStack.PushMatrix();
-	//modelStack.Translate(0, -50, 0);
-	//modelStack.Rotate(-90, 1, 0, 0);
-	//modelStack.Scale(40, 40, 40);
-	//RenderMesh(meshList[GEO_QUAD], true);
-	//modelStack.PopMatrix();
+	for (vector<ParticleObject*>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
+	{
+		ParticleObject *particle = (ParticleObject*)*it;
+		if (particle->b_active)
+			RenderParticle(particle);
+	}
+}
+
+void SceneShadow::RenderOnScreens()
+{
+	//On screen text
+std::ostringstream ss;
+ss.precision(5);
+ss << "FPS: " << fps;
+RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 6);
+
+std::ostringstream ss1;
+ss1.precision(4);
+ss1 << "Light0(" << lights[0].position.x << ", " << lights[0].position.y << ", " << lights[0].position.z << ")";
+RenderTextOnScreen(meshList[GEO_TEXT], ss1.str(), Color(0, 1, 0), 3, 0, 3);
+
+RenderTextOnScreen(meshList[GEO_TEXT], "Hello Screen", Color(0, 1, 0), 3, 0, 0);
+}
+
+void SceneShadow::RenderGO(GameObject *go)
+{
+	if (!go->b_active)
+		return;
+
+	switch (go->e_goType)
+	{
+	case GEO_TREE:
+		modelStack.PushMatrix();
+		modelStack.Translate(go->v_pos.x, go->v_pos.y, go->v_pos.z);
+		modelStack.Rotate(go->v_dir.x, 1, 0, 0);
+		modelStack.Rotate(go->v_dir.y, 0, 1, 0);
+		modelStack.Rotate(go->v_dir.z, 0, 0, 1);
+		modelStack.Scale(go->v_scale.x, go->v_scale.y, go->v_scale.z);
+		RenderMesh(meshList[go->e_goType], true);
+		modelStack.PopMatrix();
+		break;
+
+	default:
+		break;
+	};
 }
 
 void SceneShadow::RenderSkyPlane()
@@ -1018,18 +999,7 @@ void SceneShadow::Render()
 	//// Render the crosshair
 	////RenderMeshIn2D(meshList[GEO_CROSSHAIR], false, 10.0f);
 
-	////On screen text
-	//std::ostringstream ss;
-	//ss.precision(5);
-	//ss << "FPS: " << fps;
-	//RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 6);
 
-	//std::ostringstream ss1;
-	//ss1.precision(4);
-	//ss1 << "Light0(" << lights[0].position.x << ", " << lights[0].position.y << ", " << lights[0].position.z << ")";
-	//RenderTextOnScreen(meshList[GEO_TEXT], ss1.str(), Color(0, 1, 0), 3, 0, 3);
-
-	//RenderTextOnScreen(meshList[GEO_TEXT], "Hello Screen", Color(0, 1, 0), 3, 0, 0);
 
 	//******************************* PRE RENDER PASS *************************************
 	RenderPassGPass();
@@ -1046,6 +1016,13 @@ void SceneShadow::Exit()
 		if (meshList[i])
 			delete meshList[i];
 	}
+
+	for (std::vector<ParticleObject*>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
+	{
+		ParticleObject * particle = (ParticleObject*)*it;
+		delete particle;
+	}
+
 	glDeleteProgram(m_programID);
 	glDeleteProgram(m_gPassShaderID);
 	glDeleteVertexArrays(1, &m_vertexArrayID);
@@ -1113,3 +1090,33 @@ ParticleObject * SceneShadow::GetParticle(void)
 	i_particleCount++;
 	return particle;
 }
+
+void SceneShadow::UpdateGO(double dt)
+{
+}
+
+GameObject * SceneShadow::FetchGO(void)
+{
+	for (std::vector<GameObject *>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
+	{
+		GameObject *go = (GameObject*)*it;
+		if (!go->b_active)
+		{
+			go->b_active = true;
+			i_objectCount++;
+			return go;
+		}
+	}
+
+	for (unsigned i = 0; i < 10; ++i)
+	{
+		GameObject *go = new GameObject();
+		m_goList.push_back(go);
+	}
+
+	GameObject *go = m_goList.back();
+	go->b_active = true;
+	i_objectCount++;
+	return go;
+}
+
