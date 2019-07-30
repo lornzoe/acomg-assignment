@@ -227,8 +227,8 @@ void SceneShadow::Init()
 	meshList[GEO_BILLBOARD_TREE] = MeshBuilder::GenerateQuad("treeX", Color(1, 0, 1), 150.f);
 	meshList[GEO_BILLBOARD_TREE]->textureArray[0] = LoadTGA("Image//treeX.tga");
 
-	meshList[GEO_PARTICLE_WATER] = MeshBuilder::GenerateQuad("WaterParticle", Color(1, 1, 1), 150.f);
-	meshList[GEO_PARTICLE_WATER]->textureArray[0] = LoadTGA("Image//treeX.tga");
+	meshList[GEO_PARTICLE_WATER] = MeshBuilder::GenerateQuad("WaterParticle", Color(1, 1, 1), 10.f);
+	meshList[GEO_PARTICLE_WATER]->textureArray[0] = LoadTGA("Image//leaf.tga");
 
 	meshList[GEO_LIGHT_DEPTH_QUAD] = MeshBuilder::GenerateQuad("LIGHT_DEPTH_TEXTURE", Color(1, 1, 1), 1.f);
 	meshList[GEO_LIGHT_DEPTH_QUAD]->textureArray[0] = m_lightDepthFBO.GetTexture();
@@ -364,6 +364,7 @@ void SceneShadow::Update(double dt)
 
 	UpdateParticles(dt);
 
+	//=========== day night cycler
 	m_dayNightCycler.Update(dt);
 	
 	lights[0].power = m_dayNightCycler.v_sunPos.y / m_dayNightCycler.f_amplitude;
@@ -371,6 +372,11 @@ void SceneShadow::Update(double dt)
 		lights[0].power = 0.f;
 	glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
 	lights[0].position.Set(m_dayNightCycler.v_sunPos.x, m_dayNightCycler.v_sunPos.y, m_dayNightCycler.v_sunPos.z);
+
+	lights[0].color.Set(1.f, 0.5f * lights[0].power + 0.5f, lights[0].power);
+
+	glUniform3fv(m_parameters[U_LIGHT0_COLOR], 1, &lights[0].color.r);
+
 
 	if (Application::IsKeyPressed('Z'))
 	{
@@ -733,7 +739,8 @@ void SceneShadow::RenderPassMain()
 
 	// Skyplane, terrain, fog, sprites
 	RenderTerrain();
-	
+	RenderSkyPlane();
+
 	modelStack.PushMatrix();
 	modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
 	modelStack.Scale(10, 10, 10);
