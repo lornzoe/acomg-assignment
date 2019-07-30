@@ -263,6 +263,8 @@ void SceneShadow::Init()
 	}
 	cout << "================\n";
 
+	m_dayNightCycler.f_amplitude = 20.f;
+
 }
 
 void SceneShadow::Update(double dt)
@@ -348,8 +350,8 @@ void SceneShadow::Update(double dt)
 	rotateAngle += (float)(10 * dt);
 	watertranslate += (float)(dt) * 50;
 
-	camera.Update(dt);
-	//camera.SetCameraY(30 + 350.f * ReadHeightMap(m_heightMap, camera.position.x / 4000, camera.position.z / 4000), dt);
+	camera.Update(dt);	//camera.SetCameraY(30 + 350.f * ReadHeightMap(m_heightMap, camera.position.x / 4000, camera.position.z / 4000), dt);
+
 
 	fps = (float)(1.f / dt);
 
@@ -360,7 +362,26 @@ void SceneShadow::Update(double dt)
 		fireanim->m_anim->animActive = true;
 	}
 
-	//6UpdateParticles(dt);
+	//UpdateParticles(dt);
+
+	m_dayNightCycler.Update(dt);
+	
+	lights[0].power = m_dayNightCycler.v_sunPos.y / m_dayNightCycler.f_amplitude;
+	if (lights[0].power < 0.f)
+		lights[0].power = 0.f;
+	glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
+	lights[0].position.Set(m_dayNightCycler.v_sunPos.x, m_dayNightCycler.v_sunPos.y, m_dayNightCycler.v_sunPos.z);
+
+	if (Application::IsKeyPressed('Z'))
+	{
+		m_dayNightCycler.f_cycleSpeed -= dt;
+	}
+
+	if (Application::IsKeyPressed('X'))
+	{
+		m_dayNightCycler.f_cycleSpeed += dt;
+
+	}
 }
 
 void SceneShadow::RenderText(Mesh* mesh, std::string text, Color color)
@@ -630,7 +651,7 @@ void SceneShadow::RenderPassGPass()
 		Vector3 lightpos(lights[0].position.x, lights[0].position.y, lights[0].position.z);
 
 		double multiplier = lightpos.LengthSquared();
-		m_lightDepthProj.SetToOrtho(-2 * multiplier, 2 * multiplier, -2 * multiplier, 2 * multiplier, -4 * multiplier, 4 * multiplier); //different
+		m_lightDepthProj.SetToOrtho(-4 * multiplier, 4 * multiplier, -3 * multiplier, 3 * multiplier, -5 * multiplier, 4 * multiplier); //different
 
 		//if (lightpos.LengthSquared() <= 400)
 		//{
@@ -712,7 +733,7 @@ void SceneShadow::RenderPassMain()
 
 	// Skyplane, terrain, fog, sprites
 	RenderTerrain();
-
+	
 	modelStack.PushMatrix();
 	modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
 	modelStack.Scale(10, 10, 10);
@@ -765,7 +786,17 @@ ss1.precision(4);
 ss1 << "Light0(" << lights[0].position.x << ", " << lights[0].position.y << ", " << lights[0].position.z << ")";
 RenderTextOnScreen(meshList[GEO_TEXT], ss1.str(), Color(0, 1, 0), 3, 0, 3);
 
-RenderTextOnScreen(meshList[GEO_TEXT], "Hello Screen", Color(0, 1, 0), 3, 0, 0);
+std::ostringstream ss2;
+ss2.precision(4);
+
+ss2 << "Power[0]: " << lights[0].power;
+RenderTextOnScreen(meshList[GEO_TEXT], ss2.str(), Color(0, 1, 0), 3, 0, 0);
+
+std::ostringstream ss3;
+ss3.precision(4);
+ss3 << "Time: " << m_dayNightCycler.f_hour << ", Speed: " << m_dayNightCycler.f_cycleSpeed;
+RenderTextOnScreen(meshList[GEO_TEXT], ss3.str(), Color(0, 1, 0), 3, 0, 9);
+
 }
 
 void SceneShadow::RenderGO(GameObject *go)
