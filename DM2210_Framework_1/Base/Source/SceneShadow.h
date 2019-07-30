@@ -12,6 +12,7 @@
 #include "ParticleObject.h"
 #include "GeoType.h"
 #include "DepthFBO.h"
+#include "DayNightCycler.h"
 #include <vector>
  
 #define LIGHTCOUNT 1 // define the number of current lights
@@ -168,6 +169,8 @@ private:
 	Mtx44 m_lightDepthProj;
 	Mtx44 m_lightDepthView;
 	RENDER_PASS m_renderPass;
+
+	DayNightCycler m_dayNightCycler;
 };
 
 #endif //scene_shadow

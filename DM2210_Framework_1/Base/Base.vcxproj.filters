@@ -76,6 +76,7 @@
     <ClCompile Include="Source\DepthFBO.cpp">
       <Filter>Core Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DayNightCycler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Vertex.h">
@@ -149,6 +150,9 @@
     </ClInclude>
     <ClInclude Include="Source\DepthFBO.h">
       <Filter>Core Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DayNightCycler.h">
+      <Filter>Own Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
