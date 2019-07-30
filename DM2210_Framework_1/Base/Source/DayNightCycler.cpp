@@ -22,5 +22,6 @@ void DayNightCycler::Update(double dt)
 	}
 
 	v_sunPos.Set(sin(f_cyclePoint), cos(f_cyclePoint), 0);
+	v_sunPos * f_amplitude;
 	v_moonPos = -v_sunPos;
 }
