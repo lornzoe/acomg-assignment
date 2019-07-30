@@ -362,7 +362,7 @@ void SceneShadow::Update(double dt)
 		fireanim->m_anim->animActive = true;
 	}
 
-	//UpdateParticles(dt);
+	UpdateParticles(dt);
 
 	m_dayNightCycler.Update(dt);
 	
@@ -745,7 +745,14 @@ void SceneShadow::RenderPassMain()
 	modelStack.Scale(75, 75, 50);
 	RenderMeshIn2D(meshList[GEO_LIGHT_DEPTH_QUAD], false, 50.f, 0.5f, 0.25f); // Red color quad for the shadow map
 	modelStack.PopMatrix();
-	
+
+	for (vector<ParticleObject*>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
+	{
+		ParticleObject *particle = (ParticleObject*)*it;
+		if (particle->b_active)
+			RenderParticle(particle);
+	}
+
 	RenderOnScreens();
 }
 
@@ -765,12 +772,7 @@ void SceneShadow::RenderWorld()
 			RenderGO(go);
 	}
 
-	for (vector<ParticleObject*>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
-	{
-		ParticleObject *particle = (ParticleObject*)*it;
-		if (particle->b_active)
-			RenderParticle(particle);
-	}
+
 }
 
 void SceneShadow::RenderOnScreens()
