@@ -248,9 +248,8 @@ void SceneShadow::Init()
 	
 	
 
-	meshList[GEO_SKYPLANE]->textureArray[1] = LoadTGA("Image//sky.tga");
-	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//nightsky.tga");
-
+	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//sky.tga");
+	meshList[GEO_SKYPLANE]->textureArray[1] = LoadTGA("Image//nightsky.tga");
 
 	//TERRAIN
 	meshList[GEO_TERRAIN] = MeshBuilder::GenerateTerrain("terrain", "Image//heightmap2.raw", m_heightMap);
@@ -294,7 +293,7 @@ void SceneShadow::Init()
 
 	cout << "================\n";
 
-	/*for (int i = 0; i < 50; ++i)
+	for (int i = 0; i < 50; ++i)
 	{
 		GameObject * go = FetchGO();
 		go->e_goType = GEO_TREE;
@@ -319,7 +318,7 @@ void SceneShadow::Init()
 
 		m_goList.push_back(go);
 		cout << "Pushed back Tree # " << i << " into m_goList.\n";
-	}*/
+	}
 		//modelStack.PushMatrix();
 		//modelStack.Translate(-160.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000), -120.f);
 		//modelStack.Scale(5, 5, 5);
@@ -457,7 +456,7 @@ void SceneShadow::Update(double dt)
 	if (lights[0].power < 0.f)
 		lights[0].power = 0.f;
 	glUniform1f(m_parameters[U_LIGHT0_POWER], lights[0].power);
-	lights[0].position.Set(m_dayNightCycler.v_sunPos.x, m_dayNightCycler.v_sunPos.y, m_dayNightCycler.v_sunPos.z);
+	lights[0].position.Set(m_dayNightCycler.v_sunPos.x, m_dayNightCycler.v_sunPos.y, 5);
 
 	lights[0].color.Set(1.f, 0.5f * lights[0].power + 0.5f, lights[0].power);
 	glUniform3fv(m_parameters[U_LIGHT0_COLOR], 1, &lights[0].color.r);
@@ -479,7 +478,7 @@ void SceneShadow::Update(double dt)
 
 	}
 
-	f_skyPanning += dt;// *0.01f;
+	f_skyPanning += dt * 0.01f;
 	if (f_skyPanning > 1.0f)
 		f_skyPanning -= 1.f;
 	glUniform1f(m_parameters[U_TEXTURE_SKYPANVALUE], f_skyPanning);
@@ -892,6 +891,8 @@ void SceneShadow::RenderWorld()
 	for (vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
 	{
 		GameObject *go = (GameObject*)*it;
+		if (go->b_isBillboard && m_renderPass == RENDER_PASS_PRE)
+			continue;
 		if (go->b_active)
 			RenderGO(go);
 	}
@@ -958,7 +959,7 @@ void SceneShadow::RenderGO(GameObject *go)
 void SceneShadow::RenderSkyPlane()
 {
 	glUniform1i(m_parameters[U_TEXTURE_ISSKY], 1);
-	glUniform1i(m_parameters[U_TEXTURE_SKYPAN], 0);
+	glUniform1i(m_parameters[U_TEXTURE_SKYPAN], 1);
 
 	modelStack.PushMatrix();
 	modelStack.Translate(0, 2100, 0);
