@@ -166,20 +166,20 @@ void SceneShadow::Init()
 	glUniform1i(m_parameters[U_TEXT_ENABLED], 0);
 
 	lights[1].type = Light::LIGHT_SPOT;
-	lights[1].position.Set(-220.f, -48.f, -120.f);
+	//lights[1].position.Set(-220.f, -48.f, -120.f);
 	lights[1].color.Set(0.84f, 0.28f, 0);
-	lights[1].power = 800;
-	lights[1].kC = 10.f;
+	lights[1].power = 30;
+	lights[1].kC = 1.f;
 	lights[1].kL = 0.01f;
 	lights[1].kQ = 0.001f;
-	lights[1].cosCutoff = cos(Math::DegreeToRadian(45));
+	lights[1].cosCutoff = cos(Math::DegreeToRadian(150));
 	lights[1].cosInner = cos(Math::DegreeToRadian(30));
 	lights[1].exponent = 3.f;
-	lights[1].spotDirection.Set(-160.f, -1000, -120.f);
+	lights[1].spotDirection.Set(0.f, -1.f ,0.f);
 
 	glUniform1i(m_parameters[U_LIGHT1_TYPE], lights[1].type);
 	glUniform3fv(m_parameters[U_LIGHT1_COLOR], 1, &lights[1].color.r);
-	glUniform1f(m_parameters[U_LIGHT1_POWER], lights[0].power);
+	glUniform1f(m_parameters[U_LIGHT1_POWER], lights[1].power);
 	glUniform1f(m_parameters[U_LIGHT1_KC], lights[1].kC);
 	glUniform1f(m_parameters[U_LIGHT1_KL], lights[1].kL);
 	glUniform1f(m_parameters[U_LIGHT1_KQ], lights[1].kQ);
@@ -253,7 +253,7 @@ void SceneShadow::Init()
 
 	//TERRAIN
 	meshList[GEO_TERRAIN] = MeshBuilder::GenerateTerrain("terrain", "Image//heightmap2.raw", m_heightMap);
-	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//brick.tga");
+	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//grass_darkgreen.tga");
 	meshList[GEO_TERRAIN]->textureArray[1] = LoadTGA("Image//ForestFloor.tga", 1);
 
 	//TREE
@@ -348,10 +348,13 @@ void SceneShadow::Init()
 		go->v_pos.Set(-220.f, 350.f * ReadHeightMap(m_heightMap, -220.f / 4000, -120.f / 4000) + 20.f, -120.f);
 		go->v_scale.Set(60.f, 60.f, 60.f);
 		m_goList.push_back(go);
+
+		lights[1].position.Set(go->v_pos.x, go->v_pos.y, go->v_pos.z);
 	}
 	cout << "================\n";
 
 	m_dayNightCycler.f_amplitude = 20.f;
+	m_dayNightCycler.f_cycleSpeed = 10.f;
 	f_skyPanning = 0.f;
 
 }
@@ -439,8 +442,19 @@ void SceneShadow::Update(double dt)
 	rotateAngle += (float)(10 * dt);
 	watertranslate += (float)(dt) * 50;
 
-	camera.Update(dt);	//camera.SetCameraY(30 + 350.f * ReadHeightMap(m_heightMap, camera.position.x / 4000, camera.position.z / 4000), dt);
+	camera.Update(dt);	
+	camera.SetCameraY(30 + 350.f * ReadHeightMap(m_heightMap, camera.position.x / 4000, camera.position.z / 4000), dt);
 
+	if (camera.position.y < 80.f)
+	{
+		fogColor.Set(0, 0, 1.f);
+		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+	}
+	else
+	{
+		fogColor.Set(0.79f, 0.84f, 0.85f);
+		glUniform3fv(m_parameters[U_FOG_COLOR], 1, &fogColor.r);
+	}
 
 	fps = (float)(1.f / dt);
 
@@ -867,17 +881,17 @@ void SceneShadow::RenderPassMain()
 	RenderTerrain();
 	RenderSkyPlane();
 
-	modelStack.PushMatrix();
-	modelStack.Translate(lights[0].position.x, lights[0].position.y, lights[0].position.z);
-	modelStack.Scale(10, 10, 10);
-	RenderMesh(meshList[GEO_LIGHTBALL], false);
-	modelStack.PopMatrix();
+	//modelStack.PushMatrix();
+	//modelStack.Translate(lights[1].position.x, lights[1].position.y, lights[1].position.z);
+	//modelStack.Scale(10, 10, 10);
+	//RenderMesh(meshList[GEO_LIGHTBALL], false);
+	//modelStack.PopMatrix();
 
-	modelStack.PushMatrix();
-	modelStack.Translate(100, 0, 0);
-	modelStack.Scale(75, 75, 50);
-	RenderMeshIn2D(meshList[GEO_LIGHT_DEPTH_QUAD], false, 50.f, 0.5f, 0.25f); // Red color quad for the shadow map
-	modelStack.PopMatrix();
+	//modelStack.PushMatrix();
+	//modelStack.Translate(100, 0, 0);
+	//modelStack.Scale(75, 75, 50);
+	//RenderMeshIn2D(meshList[GEO_LIGHT_DEPTH_QUAD], false, 50.f, 0.5f, 0.25f); // Red color quad for the shadow map
+	//modelStack.PopMatrix();
 
 	for (vector<ParticleObject*>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
 	{
@@ -1228,64 +1242,67 @@ void SceneShadow::UpdateParticles(double dt)
 		{
 			ParticleObject * particle = (ParticleObject*)*it;
 
-			if (particle->b_active)
+			if (!particle->b_active)
+				continue;
+
+			if (particle->e_goType == GEO_PARTICLE_WATER)
 			{
-				if (particle->e_goType == GEO_PARTICLE_WATER)
-				{
-					particle->v_vel += GameObject::s_v_gravity * (float)dt;
-					particle->v_pos += particle->v_vel * (float)dt * 10.f;
-					particle->rotation += particle->rotationspeed* float(dt);
+				particle->v_vel += GameObject::s_v_gravity * (float)dt;
+				particle->v_pos += particle->v_vel * (float)dt * 10.f;
+				particle->rotation += particle->rotationspeed* float(dt);
 
-					if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z))
-					{
-						particle->b_active = false;
-						i_particleCount--;
-					}
+				if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z))
+				{
+					particle->b_active = false;
+					i_particleCount--;
+				}
+			}
+
+			if (particle->e_goType == GEO_PARTICLE_LEAF)
+			{
+
+				particle->f_timeElapsed += (float)dt;
+				if (particle->f_timeElapsed > Math::TWO_PI)
+				{
+					// since the death condition is when leaf touches ground, we'll hijack the lifespan to hold values for us
+					particle->f_timeElapsed -= Math::TWO_PI;
+					particle->f_lifespan = rand() % 10 - 5;
+					particle->rotation *= -1;
 				}
 
-				if (particle->e_goType == GEO_PARTICLE_LEAF)
+				particle->v_vel.x = sin(particle->f_timeElapsed) * particle->f_lifespan;
+				particle->v_vel.z = cos(particle->f_timeElapsed) * particle->f_lifespan;
+
+
+				particle->v_vel.y += GameObject::s_v_gravity.y * 0.5f * (float)dt;
+				particle->v_pos += particle->v_vel * (float)dt * 10.f;
+				particle->rotation += particle->rotationspeed* float(dt);
+
+				if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z) * 350.f)
 				{
-
-					particle->f_timeElapsed += (float)dt;
-					if (particle->f_timeElapsed > Math::TWO_PI)
-					{
-						// since the death condition is when leaf touches ground, we'll hijack the lifespan to hold values for us
-						particle->f_timeElapsed -= Math::TWO_PI;
-						particle->f_lifespan = rand() % 10 - 5;
-						particle->rotation *= -1;
-					}
-
-					particle->v_vel.x = sin(particle->f_timeElapsed) * particle->f_lifespan;
-					particle->v_vel.z = cos(particle->f_timeElapsed) * particle->f_lifespan;
-
-
-					particle->v_vel.y += GameObject::s_v_gravity.y * 0.5f * (float)dt;
-					particle->v_pos += particle->v_vel * (float)dt * 10.f;
-					particle->rotation += particle->rotationspeed* float(dt);
-
-					if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z) * 350.f)
-					{
-						particle->b_active = false;
-						i_particleCount--;
-					}
-
+					particle->b_active = false;
+					i_particleCount--;
+					cout << "leaf particle deactivated, particlecount left: " << i_particleCount << '\n';
 				}
-				
-				if (particle->e_goType == GEO_PARTICLE_SMOKE)
+
+			}
+
+			if (particle->e_goType == GEO_PARTICLE_SMOKE)
+			{
+				particle->v_vel += (-GameObject::s_v_gravity * 0.5f) * (float)dt;
+				particle->v_pos += particle->v_vel * (float)dt * 10.f;
+
+				particle->f_lifespan -= dt;
+				float sqrtls = particle->f_lifespan / 5; //sqrt(particle->f_lifespan);
+
+				particle->v_scale.Set(sqrtls, sqrtls, sqrtls);
+
+				if (particle->f_lifespan < 0.f)
 				{
-					particle->v_vel += (-GameObject::s_v_gravity) * (float)dt;
-					particle->v_pos += particle->v_vel * (float)dt * 10.f;
+					particle->b_active = false;
+					i_particleCount--;
+					cout << "smoke deactivated, particlecount left: " << i_particleCount << '\n';
 
-					particle->f_lifespan -= dt;
-					float sqrtls = particle->f_lifespan / 10; //sqrt(particle->f_lifespan);
-
-					particle->v_scale.Set(sqrtls, sqrtls, sqrtls);
-
-					if (particle->f_lifespan < 0.f)
-					{
-						particle->b_active = false;
-						i_particleCount--;
-					}
 				}
 			}
 		}
@@ -1328,7 +1345,7 @@ void SceneShadow::UpdateGO(double dt)
 
 		int RNG = rand();
 
-		ParticleObject * particle = GetParticle();
+		ParticleObject * particle; 
 
 		switch (go->e_goType)
 		{
@@ -1340,6 +1357,7 @@ void SceneShadow::UpdateGO(double dt)
 			if (RNG != 2)// 1% chance of rendering 
 				break;
 
+			particle = GetParticle();
 			particle->e_goType = GEO_PARTICLE_LEAF;
 			particle->b_isBillboard = true;
 			particle->b_isAnimation = false;
@@ -1355,13 +1373,18 @@ void SceneShadow::UpdateGO(double dt)
 			particle->v_vel.Set(1, 0.1f, 1);
 
 			particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
-			i_particleCount++;
+			//cout << "particle spawned on: " << particle->v_pos << '\n';
+
 			break;
 
 		case GEO_FIRE:
+			if (i_particleCount >= MAX_PARTICLE)
+				break;
 			RNG = RNG % 100 + 1;
 			if (RNG > 5)// 5% chance of rendering 
 				break;
+
+			particle = GetParticle();
 
 			particle->e_goType = GEO_PARTICLE_SMOKE;
 			particle->b_isBillboard = true;
@@ -1371,15 +1394,15 @@ void SceneShadow::UpdateGO(double dt)
 
 			particle->v_vel.Set(Math::RandFloatMinMax(-5.f, 5.f), 0.1f, Math::RandFloatMinMax(-5.f, 5.f));
 
-			particle->f_lifespan = rand() % 5 + 5;
-			particle->v_scale.Set(particle->f_lifespan, particle->f_lifespan, particle->f_lifespan);
+			particle->f_lifespan = rand() % 2 + 2;
+			//particle->v_scale.Set(particle->f_lifespan, particle->f_lifespan, particle->f_lifespan);
 			particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
-			i_particleCount++;
 			
-			cout << "particle spawned on: " << particle->v_pos << '\n';
+			//cout << "particle spawned on: " << particle->v_pos << '\n';
 			break;
 		default:
-			particle->b_active = false;
+			//particle->b_active = false;
+			break;
 		}
 	}
 }
