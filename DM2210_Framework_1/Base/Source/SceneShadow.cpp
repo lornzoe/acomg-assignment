@@ -287,6 +287,9 @@ void SceneShadow::Init()
 	meshList[GEO_LIGHT_DEPTH_QUAD] = MeshBuilder::GenerateQuad("LIGHT_DEPTH_TEXTURE", Color(1, 1, 1), 1.f);
 	meshList[GEO_LIGHT_DEPTH_QUAD]->textureArray[0] = m_lightDepthFBO.GetTexture();
 
+	meshList[GEO_PARTICLE_LEAF] = MeshBuilder::GenerateQuad("LeafParticle", Color(1, 1, 1), 10.f);
+	meshList[GEO_PARTICLE_LEAF]->textureArray[0] = LoadTGA("Image//leaf.tga");
+
 	rotateAngle = 0;
 
 	bLightEnabled = true;
@@ -447,6 +450,7 @@ void SceneShadow::Update(double dt)
 		fireanim->m_anim->animActive = true;
 	}
 
+	UpdateGO(dt);
 	UpdateParticles(dt);
 
 	//=========== day night cycler
@@ -466,6 +470,8 @@ void SceneShadow::Update(double dt)
 	glUniform1f(m_parameters[U_TEXTURE_NIGHTDISTRIBUTION], f_nightDistribution);
 
 	cout << f_dayDistribution << ',' << f_nightDistribution << ',' << f_dayDistribution + f_nightDistribution << '\n';
+	lights[0].power *= 50.f;
+
 
 	if (Application::IsKeyPressed('Z'))
 	{
@@ -702,6 +708,7 @@ void SceneShadow::RenderParticle(ParticleObject * particle)
 	switch (particle->e_goType)
 	{
 	case GEO_PARTICLE_WATER:
+	case GEO_PARTICLE_LEAF:
 		modelStack.PushMatrix();
 		modelStack.Translate(particle->v_pos.x, particle->v_pos.y, particle->v_pos.z);
 		modelStack.Rotate(Math::RadianToDegree(atan2(camera.position.x - particle->v_pos.x, camera.position.z - particle->v_pos.z)), 0, 1, 0);
@@ -710,6 +717,7 @@ void SceneShadow::RenderParticle(ParticleObject * particle)
 		RenderMesh(meshList[particle->e_goType], false);
 		modelStack.PopMatrix();
 		break;
+
 	}
 }
 
@@ -1201,7 +1209,7 @@ void SceneShadow::Exit()
 
 void SceneShadow::UpdateParticles(double dt)
 {
-	if (i_particleCount < MAX_PARTICLE)
+	/*if (i_particleCount < MAX_PARTICLE)
 	{
 		ParticleObject * particle = GetParticle();
 		particle->e_goType = GEO_PARTICLE_WATER;
@@ -1211,7 +1219,7 @@ void SceneShadow::UpdateParticles(double dt)
 		particle->v_pos.Set(Math::RandFloatMinMax(-1700, 1700), 750.f, Math::RandFloatMinMax(-1700, 1700));
 //		cout << "particle is at " << particle->v_pos << '\n';
 
-	}
+	}*/
 
 	{
 		for (std::vector<ParticleObject*>::iterator it = m_poList.begin(); it != m_poList.end(); ++it)
@@ -1231,6 +1239,34 @@ void SceneShadow::UpdateParticles(double dt)
 						particle->b_active = false;
 						i_particleCount--;
 					}
+				}
+
+				if (particle->e_goType == GEO_PARTICLE_LEAF)
+				{
+
+					particle->f_timeElapsed += (float)dt;
+					if (particle->f_timeElapsed > Math::TWO_PI)
+					{
+						// since the death condition is when leaf touches ground, we'll hijack the lifespan to hold values for us
+						particle->f_timeElapsed -= Math::TWO_PI;
+						particle->f_lifespan = rand() % 10 - 5;
+						particle->rotation *= -1;
+					}
+
+					particle->v_vel.x = sin(particle->f_timeElapsed) * particle->f_lifespan;
+					particle->v_vel.z = cos(particle->f_timeElapsed) * particle->f_lifespan;
+
+
+					//particle->v_vel.y += GameObject::s_v_gravity.y * (float)dt;
+					particle->v_pos += particle->v_vel * (float)dt * 10.f;
+					particle->rotation += particle->rotationspeed* float(dt);
+
+					if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z) * 350.f)
+					{
+						particle->b_active = false;
+						i_particleCount--;
+					}
+
 				}
 			}
 		}
@@ -1264,6 +1300,47 @@ ParticleObject * SceneShadow::GetParticle(void)
 
 void SceneShadow::UpdateGO(double dt)
 {
+	for (std::vector<GameObject *>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
+	{
+		GameObject *go = (GameObject*)*it;
+
+		if (!go->b_active)
+			continue;
+
+		int RNG;
+
+		switch (go->e_goType)
+		{
+		case GEO_TREE:
+			if (i_particleCount >= MAX_PARTICLE)
+				break;
+
+			int RNG = rand() % 100 + 1;
+			if (RNG != 1)
+				break;
+
+			ParticleObject * particle = GetParticle();
+
+			particle->e_goType = GEO_PARTICLE_LEAF;
+			particle->b_isBillboard = true;
+			particle->b_isAnimation = false;
+			particle->f_timeElapsed = 0.f;
+	
+			particle->v_pos.x = go->v_pos.x + Math::RandFloatMinMax(-100.f, 100.f);
+			particle->v_pos.z = go->v_pos.z + Math::RandFloatMinMax(-100.f, 100.f);
+			particle->v_pos.y = go->v_pos.y + 6.f * go->v_scale.y;
+
+			particle->v_scale.Set(1.f, 1.f, 1.f);
+
+			particle->f_lifespan = rand() % 20 - 10;
+			particle->v_vel.Set(1, -5.f, 1);
+
+			particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
+			cout << "particle is at " << particle->v_pos << '\n';
+
+			break;
+		}
+	}
 }
 
 GameObject * SceneShadow::FetchGO(void)

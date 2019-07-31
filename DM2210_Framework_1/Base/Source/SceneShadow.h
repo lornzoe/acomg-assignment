@@ -180,6 +180,7 @@ private:
 	float fogStart, fogEnd;
 
 	std::vector<GameObject *> m_goList;
+
 	std::vector<ParticleObject *> m_poList;
 	int i_objectCount;
 	int i_particleCount;
