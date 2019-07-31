@@ -280,7 +280,7 @@ void main(){
 					color = color/texCount;
 
 						// simple alpha check; we need to prevent fragments from being written entirely if they're transparent
-					if (color.a < 0.5)
+					if (color.a < 0.01)
 						discard;
 				}
 
