@@ -122,6 +122,12 @@ uniform vec3 textColor;
 uniform FogParam fogParam;
 uniform sampler2D shadowMap;
 
+uniform bool isWater;
+
+uniform int isSkyPlane;
+uniform float dayDistribution;
+uniform float nightDistribution;
+
 float getShadowEffect()
 {
 	float visibility = 1.0;
@@ -177,14 +183,20 @@ void main(){
 			// Light direction
 			float spotlightEffect = 1;
 			vec3 lightDirection_cameraspace;
-			if(lights[i].type == 1) {
+
+			if(lights[i].type == 1) 
+			{
 				lightDirection_cameraspace = lights[i].position_cameraspace;
 			}
-			else if(lights[i].type == 2) {
+
+			else if(lights[i].type == 2)
+			{
 				lightDirection_cameraspace = lights[i].position_cameraspace - vertexPosition_cameraspace;
 				spotlightEffect = getSpotlightEffect(lights[i], lightDirection_cameraspace);
 			}
-			else {
+
+			else 
+			{
 				lightDirection_cameraspace = lights[i].position_cameraspace - vertexPosition_cameraspace;
 			}
 			// Distance to the light
@@ -216,29 +228,65 @@ void main(){
 		{
 			color = texture2D( colorTexture[0], texCoord ) * vec4( textColor, 1 );
 		}
+
 		else
 		{
 			int texCount = 0;
 		
 			color = vec4(0, 0, 0, 0);
-			for (int i = 0; i < MAX_TEXTURES; ++i)
-			{
-				if(colorTextureEnabled[i] == true)
-				{
-					color += texture2D( colorTexture[i], texCoord );
-					++texCount;
-				}
-			}
-			if (texCount > 0)
-			{
-				color = color/texCount;
 
-					// simple alpha check; we need to prevent fragments from being written entirely if they're transparent
-				if (color.a < 0.1)
-					discard;
+			if(isSkyPlane == 1)
+			{				
+
+				for (int i = 0; i < MAX_TEXTURES; ++i)
+				{
+					if(colorTextureEnabled[i] == true)
+					{
+						if (i == 0)
+						{
+							vec4 tempcolor = vec4(0,0,0,1);
+							tempcolor = (texture2D( colorTexture[i], texCoord )) ;
+							tempcolor = tempcolor / (1/dayDistribution);
+							color += tempcolor;
+						}
+						else if (i == 1)
+						{
+							vec4 tempcolor = vec4(0,0,0,1);
+							tempcolor = (texture2D( colorTexture[i], texCoord )) ;
+							tempcolor = tempcolor / (1/nightDistribution);
+							color += tempcolor;
+						}
+
+					}
+
+				}
+				
+				
 			}
-			else
-				color = vec4( fragmentColor, 1 );
+
+			else if (isSkyPlane == 0)
+			{
+				for (int i = 0; i < MAX_TEXTURES; ++i)
+				{
+					if(colorTextureEnabled[i] == true)
+					{
+						color += texture2D( colorTexture[i], texCoord );
+						++texCount;
+					}
+				}
+
+				if (texCount > 0)
+				{
+					color = color/texCount;
+
+						// simple alpha check; we need to prevent fragments from being written entirely if they're transparent
+					if (color.a < 0.5)
+						discard;
+				}
+
+				else
+					color = vec4( fragmentColor, 1 );
+			}
 		}
 		
 	}
@@ -250,6 +298,10 @@ void main(){
 		color = mix(color, vec4(fogParam.color, 1), fogFactor);
 	}
 
+		if (isWater == true)
+	{
+		color.a = color.a * 0.2;
+	}
 
 }
 

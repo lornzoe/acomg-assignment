@@ -15,7 +15,7 @@
 #include "DayNightCycler.h"
 #include <vector>
  
-#define LIGHTCOUNT 1 // define the number of current lights
+#define LIGHTCOUNT 2 // define the number of current lights
 #define MAX_PARTICLE 1000
 #define NUMLIGHTCUTOFF 7 + LIGHTCOUNT * 12
 
@@ -60,11 +60,23 @@ class SceneShadow : public Scene
 		U_NUMLIGHTS = NUMLIGHTCUTOFF,
 
 		U_COLOR_TEXTURE_ENABLED,
+		U_COLOR_TEXTURE_ENABLED1,
+		U_COLOR_TEXTURE_ENABLED2,
+		U_COLOR_TEXTURE_ENABLED3,
+		U_COLOR_TEXTURE_ENABLED4,
+		U_COLOR_TEXTURE_ENABLED5,
+		U_COLOR_TEXTURE_ENABLED6,
+		U_COLOR_TEXTURE_ENABLED7,
+
 		// colortextureenabled lasts for 56 to (56 + 7)
 		U_COLOR_TEXTURE = U_COLOR_TEXTURE_ENABLED + MAX_TEXTURES,
-		// colortexture takes up 64 to (64 + 7)
-
-		U_COLOR = U_COLOR_TEXTURE + MAX_TEXTURES,
+		U_COLOR_TEXTURE1,
+		U_COLOR_TEXTURE2,
+		U_COLOR_TEXTURE3,
+		U_COLOR_TEXTURE4,
+		U_COLOR_TEXTURE5,
+		U_COLOR_TEXTURE6,
+		U_COLOR_TEXTURE7,
 
 		U_TEXT_ENABLED,
 		U_TEXT_COLOR,
@@ -87,6 +99,14 @@ class SceneShadow : public Scene
 		U_SHADOW_COLOR_TEXTURE_ENABLED,
 		U_SHADOW_COLOR_TEXTURE_ENABLED1,
 		U_SHADOW_COLOR_TEXTURE_ENABLED2,
+
+		U_TEXTURE_ISWATER,
+
+		U_TEXTURE_ISSKY,
+		U_TEXTURE_DAYDISTRIBUTION,
+		U_TEXTURE_NIGHTDISTRIBUTION,
+		U_TEXTURE_SKYPAN,
+		U_TEXTURE_SKYPANVALUE,
 
 		U_TOTAL,
 	};
@@ -172,6 +192,10 @@ private:
 	RENDER_PASS m_renderPass;
 
 	DayNightCycler m_dayNightCycler;
+
+	float f_dayDistribution;
+	float f_nightDistribution;
+	float f_skyPanning;
 };
 
 #endif //scene_shadow
