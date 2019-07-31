@@ -1113,8 +1113,20 @@ void SceneShadow::UpdateParticles(double dt)
 				if (particle->e_goType == GEO_PARTICLE_LEAF)
 				{
 
+					particle->f_timeElapsed += (float)dt;
+					if (particle->f_timeElapsed > Math::TWO_PI)
+					{
+						// since the death condition is when leaf touches ground, we'll hijack the lifespan to hold values for us
+						particle->f_timeElapsed -= Math::TWO_PI;
+						particle->f_lifespan = rand() % 10 - 5;
+						particle->rotation *= -1;
+					}
 
-					particle->v_vel += GameObject::s_v_gravity * (float)dt;
+					particle->v_vel.x = sin(particle->f_timeElapsed) * particle->f_lifespan;
+					particle->v_vel.z = cos(particle->f_timeElapsed) * particle->f_lifespan;
+
+
+					//particle->v_vel.y += GameObject::s_v_gravity.y * (float)dt;
 					particle->v_pos += particle->v_vel * (float)dt * 10.f;
 					particle->rotation += particle->rotationspeed* float(dt);
 
@@ -1181,13 +1193,16 @@ void SceneShadow::UpdateGO(double dt)
 			particle->e_goType = GEO_PARTICLE_LEAF;
 			particle->b_isBillboard = true;
 			particle->b_isAnimation = false;
-
+			particle->f_timeElapsed = 0.f;
+	
 			particle->v_pos.x = go->v_pos.x + Math::RandFloatMinMax(-100.f, 100.f);
 			particle->v_pos.z = go->v_pos.z + Math::RandFloatMinMax(-100.f, 100.f);
 			particle->v_pos.y = go->v_pos.y + 6.f * go->v_scale.y;
 
 			particle->v_scale.Set(1.f, 1.f, 1.f);
-			particle->v_vel.Set(1, 1, 1);
+
+			particle->f_lifespan = rand() % 20 - 10;
+			particle->v_vel.Set(1, -5.f, 1);
 
 			particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
 			cout << "particle is at " << particle->v_pos << '\n';
