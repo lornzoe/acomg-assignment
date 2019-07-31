@@ -289,7 +289,8 @@ void SceneShadow::Init()
 
 	meshList[GEO_PARTICLE_LEAF] = MeshBuilder::GenerateQuad("LeafParticle", Color(1, 1, 1), 10.f);
 	meshList[GEO_PARTICLE_LEAF]->textureArray[0] = LoadTGA("Image//leaf.tga");
-
+	meshList[GEO_PARTICLE_SMOKE] = MeshBuilder::GenerateQuad("SmokeParticle", Color(1, 1, 1), 10.f);
+	meshList[GEO_PARTICLE_SMOKE]->textureArray[0] = LoadTGA("Image//smoke.tga");
 	rotateAngle = 0;
 
 	bLightEnabled = true;
@@ -469,7 +470,7 @@ void SceneShadow::Update(double dt)
 	f_nightDistribution = 1.f - lights[0].power;
 	glUniform1f(m_parameters[U_TEXTURE_NIGHTDISTRIBUTION], f_nightDistribution);
 
-	cout << f_dayDistribution << ',' << f_nightDistribution << ',' << f_dayDistribution + f_nightDistribution << '\n';
+	//cout << f_dayDistribution << ',' << f_nightDistribution << ',' << f_dayDistribution + f_nightDistribution << '\n';
 	lights[0].power *= 50.f;
 
 
@@ -707,6 +708,7 @@ void SceneShadow::RenderParticle(ParticleObject * particle)
 {
 	switch (particle->e_goType)
 	{
+	case GEO_PARTICLE_SMOKE:
 	case GEO_PARTICLE_WATER:
 	case GEO_PARTICLE_LEAF:
 		modelStack.PushMatrix();
@@ -1257,7 +1259,7 @@ void SceneShadow::UpdateParticles(double dt)
 					particle->v_vel.z = cos(particle->f_timeElapsed) * particle->f_lifespan;
 
 
-					//particle->v_vel.y += GameObject::s_v_gravity.y * (float)dt;
+					particle->v_vel.y += GameObject::s_v_gravity.y * 0.5f * (float)dt;
 					particle->v_pos += particle->v_vel * (float)dt * 10.f;
 					particle->rotation += particle->rotationspeed* float(dt);
 
@@ -1267,6 +1269,23 @@ void SceneShadow::UpdateParticles(double dt)
 						i_particleCount--;
 					}
 
+				}
+				
+				if (particle->e_goType == GEO_PARTICLE_SMOKE)
+				{
+					particle->v_vel += (-GameObject::s_v_gravity) * (float)dt;
+					particle->v_pos += particle->v_vel * (float)dt * 10.f;
+
+					particle->f_lifespan -= dt;
+					float sqrtls = particle->f_lifespan / 10; //sqrt(particle->f_lifespan);
+
+					particle->v_scale.Set(sqrtls, sqrtls, sqrtls);
+
+					if (particle->f_lifespan < 0.f)
+					{
+						particle->b_active = false;
+						i_particleCount--;
+					}
 				}
 			}
 		}
@@ -1307,7 +1326,9 @@ void SceneShadow::UpdateGO(double dt)
 		if (!go->b_active)
 			continue;
 
-		int RNG;
+		int RNG = rand();
+
+		ParticleObject * particle = GetParticle();
 
 		switch (go->e_goType)
 		{
@@ -1315,17 +1336,15 @@ void SceneShadow::UpdateGO(double dt)
 			if (i_particleCount >= MAX_PARTICLE)
 				break;
 
-			int RNG = rand() % 100 + 1;
-			if (RNG != 1)
+			RNG = RNG % 100 + 1;
+			if (RNG != 2)// 1% chance of rendering 
 				break;
-
-			ParticleObject * particle = GetParticle();
 
 			particle->e_goType = GEO_PARTICLE_LEAF;
 			particle->b_isBillboard = true;
 			particle->b_isAnimation = false;
 			particle->f_timeElapsed = 0.f;
-	
+
 			particle->v_pos.x = go->v_pos.x + Math::RandFloatMinMax(-100.f, 100.f);
 			particle->v_pos.z = go->v_pos.z + Math::RandFloatMinMax(-100.f, 100.f);
 			particle->v_pos.y = go->v_pos.y + 6.f * go->v_scale.y;
@@ -1333,12 +1352,34 @@ void SceneShadow::UpdateGO(double dt)
 			particle->v_scale.Set(1.f, 1.f, 1.f);
 
 			particle->f_lifespan = rand() % 20 - 10;
-			particle->v_vel.Set(1, -5.f, 1);
+			particle->v_vel.Set(1, 0.1f, 1);
 
 			particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
-			cout << "particle is at " << particle->v_pos << '\n';
-
+			i_particleCount++;
 			break;
+
+		case GEO_FIRE:
+			RNG = RNG % 100 + 1;
+			if (RNG > 5)// 5% chance of rendering 
+				break;
+
+			particle->e_goType = GEO_PARTICLE_SMOKE;
+			particle->b_isBillboard = true;
+			particle->b_isAnimation = false;
+			particle->f_timeElapsed = 0.f;
+			particle->v_pos = go->v_pos;
+
+			particle->v_vel.Set(Math::RandFloatMinMax(-5.f, 5.f), 0.1f, Math::RandFloatMinMax(-5.f, 5.f));
+
+			particle->f_lifespan = rand() % 5 + 5;
+			particle->v_scale.Set(particle->f_lifespan, particle->f_lifespan, particle->f_lifespan);
+			particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
+			i_particleCount++;
+			
+			cout << "particle spawned on: " << particle->v_pos << '\n';
+			break;
+		default:
+			particle->b_active = false;
 		}
 	}
 }
