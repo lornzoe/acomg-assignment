@@ -254,8 +254,8 @@ void SceneShadow::Init()
 
 	//TERRAIN
 	meshList[GEO_TERRAIN] = MeshBuilder::GenerateTerrain("terrain", "Image//heightmap2.raw", m_heightMap);
-	meshList[GEO_TERRAIN]->textureArray[1] = LoadTGA("Image//calibri.tga");
-	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//ForestFloor.tga");
+	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//brick.tga");
+	meshList[GEO_TERRAIN]->textureArray[1] = LoadTGA("Image//ForestFloor.tga", 1);
 
 	//TREE
 	meshList[GEO_TREE] = MeshBuilder::GenerateOBJ("treeObj", "OBJ//Tree.obj");
@@ -655,7 +655,7 @@ void SceneShadow::RenderMesh(Mesh *mesh, bool enableLight)
 			glUniform1i(m_parameters[U_COLOR_TEXTURE_ENABLED + i], 1);
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, mesh->textureArray[i]);
-			glUniform1i(m_parameters[U_COLOR_TEXTURE + i], 0);
+			glUniform1i(m_parameters[U_COLOR_TEXTURE + i], i);
 		}
 		else
 		{
