@@ -210,7 +210,9 @@ void SceneText::Init()
 	meshList[GEO_GRASS_LIGHTGREEN]->textureArray[0] = LoadTGA("Image//grass_lightgreen.tga");
 
 	meshList[GEO_SKYPLANE] = MeshBuilder::GenerateSkyPlane("skyplane", Color(1.0f, 0, 0), 128, 200.f, 2100.f, 1, 1);
-	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//sky.tga");
+	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//Crosshair.tga");
+	meshList[GEO_SKYPLANE]->textureArray[1] = LoadTGA("Image//PLAYER_PISTOL.tga");
+
 	//TERRAIN
 	meshList[GEO_TERRAIN] = MeshBuilder::GenerateTerrain("terrain", "Image//heightmap2.raw", m_heightMap);
 	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//grass_darkgreen.tga");
