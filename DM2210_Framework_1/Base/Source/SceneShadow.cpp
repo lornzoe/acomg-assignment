@@ -67,6 +67,17 @@ void SceneShadow::Init()
 	m_parameters[U_LIGHT0_COSINNER] = glGetUniformLocation(m_programID, "lights[0].cosInner");
 	m_parameters[U_LIGHT0_EXPONENT] = glGetUniformLocation(m_programID, "lights[0].exponent");
 
+	m_parameters[U_LIGHT1_TYPE] = glGetUniformLocation(m_programID, "lights[1].type");
+	m_parameters[U_LIGHT1_POSITION] = glGetUniformLocation(m_programID, "lights[1].position_cameraspace");
+	m_parameters[U_LIGHT1_COLOR] = glGetUniformLocation(m_programID, "lights[1].color");
+	m_parameters[U_LIGHT1_POWER] = glGetUniformLocation(m_programID, "lights[1].power");
+	m_parameters[U_LIGHT1_KC] = glGetUniformLocation(m_programID, "lights[1].kC");
+	m_parameters[U_LIGHT1_KL] = glGetUniformLocation(m_programID, "lights[1].kL");
+	m_parameters[U_LIGHT1_KQ] = glGetUniformLocation(m_programID, "lights[1].kQ");
+	m_parameters[U_LIGHT1_SPOTDIRECTION] = glGetUniformLocation(m_programID, "lights[1].spotDirection");
+	m_parameters[U_LIGHT1_COSCUTOFF] = glGetUniformLocation(m_programID, "lights[1].cosCutoff");
+	m_parameters[U_LIGHT1_COSINNER] = glGetUniformLocation(m_programID, "lights[1].cosInner");
+	m_parameters[U_LIGHT1_EXPONENT] = glGetUniformLocation(m_programID, "lights[1].exponent");
 	// Get a handle for our "colorTexture" uniform
 	m_parameters[U_COLOR_TEXTURE_ENABLED] = glGetUniformLocation(m_programID, "colorTextureEnabled[0]");
 	m_parameters[U_COLOR_TEXTURE] = glGetUniformLocation(m_programID, "colorTexture[0]");
@@ -105,6 +116,9 @@ void SceneShadow::Init()
 	m_parameters[U_TEXTURE_ISWATER] = glGetUniformLocation(m_programID, "isWater");
 	m_parameters[U_TEXTURE_ISSKY] = glGetUniformLocation(m_programID, "isSkyPlane");
 	m_parameters[U_TEXTURE_DAYDISTRIBUTION] = glGetUniformLocation(m_programID, "dayDistribution");
+	m_parameters[U_TEXTURE_NIGHTDISTRIBUTION] = glGetUniformLocation(m_programID, "nightDistribution");
+	m_parameters[U_TEXTURE_SKYPAN] = glGetUniformLocation(m_programID, "skyPan");
+	m_parameters[U_TEXTURE_SKYPANVALUE] = glGetUniformLocation(m_programID, "panValue");
 
 	m_gPassShaderID = LoadShaders("Shader//GPass.vertexshader", "Shader//GPass.fragmentshader");
 	m_parameters[U_LIGHT_DEPTH_MVP_GPASS] = glGetUniformLocation(m_gPassShaderID, "lightDepthMVP");
@@ -146,6 +160,32 @@ void SceneShadow::Init()
 	glUniform1f(m_parameters[U_LIGHT0_COSCUTOFF], lights[0].cosCutoff);
 	glUniform1f(m_parameters[U_LIGHT0_COSINNER], lights[0].cosInner);
 	glUniform1f(m_parameters[U_LIGHT0_EXPONENT], lights[0].exponent);
+
+
+	glUniform1i(m_parameters[U_NUMLIGHTS], LIGHTCOUNT);
+	glUniform1i(m_parameters[U_TEXT_ENABLED], 0);
+
+	lights[1].type = Light::LIGHT_SPOT;
+	lights[1].position.Set(-220.f, -48.f, -120.f);
+	lights[1].color.Set(0.84f, 0.28f, 0);
+	lights[1].power = 800;
+	lights[1].kC = 10.f;
+	lights[1].kL = 0.01f;
+	lights[1].kQ = 0.001f;
+	lights[1].cosCutoff = cos(Math::DegreeToRadian(45));
+	lights[1].cosInner = cos(Math::DegreeToRadian(30));
+	lights[1].exponent = 3.f;
+	lights[1].spotDirection.Set(-160.f, -1000, -120.f);
+
+	glUniform1i(m_parameters[U_LIGHT1_TYPE], lights[1].type);
+	glUniform3fv(m_parameters[U_LIGHT1_COLOR], 1, &lights[1].color.r);
+	glUniform1f(m_parameters[U_LIGHT1_POWER], lights[0].power);
+	glUniform1f(m_parameters[U_LIGHT1_KC], lights[1].kC);
+	glUniform1f(m_parameters[U_LIGHT1_KL], lights[1].kL);
+	glUniform1f(m_parameters[U_LIGHT1_KQ], lights[1].kQ);
+	glUniform1f(m_parameters[U_LIGHT1_COSCUTOFF], lights[1].cosCutoff);
+	glUniform1f(m_parameters[U_LIGHT1_COSINNER], lights[1].cosInner);
+	glUniform1f(m_parameters[U_LIGHT1_EXPONENT], lights[1].exponent);
 
 	camera.Init(Vector3(0, 0, 10), Vector3(0, 0, 0), Vector3(0, 1, 0));
 
@@ -204,12 +244,18 @@ void SceneShadow::Init()
 	meshList[GEO_GRASS_LIGHTGREEN] = MeshBuilder::GenerateQuad("GEO_GRASS_LIGHTGREEN", Color(0, 1, 1), 1.f);
 	meshList[GEO_GRASS_LIGHTGREEN]->textureArray[0] = LoadTGA("Image//grass_lightgreen.tga");
 
-	meshList[GEO_SKYPLANE] = MeshBuilder::GenerateSkyPlane("skyplane", Color(1.0f, 0, 0), 128, 200.f, 2100.f, 1, 1);
-	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//sky.tga");
+	meshList[GEO_SKYPLANE] = MeshBuilder::GenerateSkyPlane("skyplane", Color(1.0f, 0.f, 1.f), 128, 200.f, 2100.f, 1, 1);
+	
+	
+
+	meshList[GEO_SKYPLANE]->textureArray[1] = LoadTGA("Image//sky.tga");
+	meshList[GEO_SKYPLANE]->textureArray[0] = LoadTGA("Image//nightsky.tga");
+
+
 	//TERRAIN
 	meshList[GEO_TERRAIN] = MeshBuilder::GenerateTerrain("terrain", "Image//heightmap2.raw", m_heightMap);
-	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//grass_darkgreen.tga");
-	meshList[GEO_TERRAIN]->textureArray[1] = LoadTGA("Image//ForestFloor.tga");
+	meshList[GEO_TERRAIN]->textureArray[1] = LoadTGA("Image//calibri.tga");
+	meshList[GEO_TERRAIN]->textureArray[0] = LoadTGA("Image//ForestFloor.tga");
 
 	//TREE
 	meshList[GEO_TREE] = MeshBuilder::GenerateOBJ("treeObj", "OBJ//Tree.obj");
@@ -248,7 +294,7 @@ void SceneShadow::Init()
 
 	cout << "================\n";
 
-	for (int i = 0; i < 75; ++i)
+	/*for (int i = 0; i < 50; ++i)
 	{
 		GameObject * go = FetchGO();
 		go->e_goType = GEO_TREE;
@@ -261,6 +307,10 @@ void SceneShadow::Init()
 			ypos = ReadHeightMap(m_heightMap, xpos / 4000, zpos / 4000) * 350.f;
 		} while (ypos < 90.f);
 
+		
+
+
+
 		float rscale = Math::RandFloatMinMax(30, 50);
 		go->v_scale.Set(rscale, rscale, rscale);
 
@@ -269,10 +319,37 @@ void SceneShadow::Init()
 
 		m_goList.push_back(go);
 		cout << "Pushed back Tree # " << i << " into m_goList.\n";
+	}*/
+		//modelStack.PushMatrix();
+		//modelStack.Translate(-160.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000), -120.f);
+		//modelStack.Scale(5, 5, 5);
+		//RenderMesh(meshList[GEO_CAMPFIRE], true);
+		//modelStack.PopMatrix();
+	{
+		GameObject * go = FetchGO();
+		go->e_goType = GEO_CAMPFIRE;
+		go->v_pos.Set(-220.f, 350.f * ReadHeightMap(m_heightMap, -220.f / 4000, -120.f / 4000), -120.f);
+		go->v_scale.Set(5.f, 5.f, 5.f);
+		m_goList.push_back(go);
+	}
+	//modelStack.PushMatrix();
+	//modelStack.Translate(-160.f, 350.f * ReadHeightMap(m_heightMap, -160.f / 4000, -120.f / 4000) + 20.f, -120.f);
+	//modelStack.Scale(60, 60, 60);
+	//RenderMesh(meshList[GEO_FIRE], false);
+	//modelStack.PopMatrix();
+	{
+		GameObject * go = FetchGO();
+		go->e_goType = GEO_FIRE;
+		go->b_isAnimation = true;
+		go->b_isBillboard = true;
+		go->v_pos.Set(-220.f, 350.f * ReadHeightMap(m_heightMap, -220.f / 4000, -120.f / 4000) + 20.f, -120.f);
+		go->v_scale.Set(60.f, 60.f, 60.f);
+		m_goList.push_back(go);
 	}
 	cout << "================\n";
 
 	m_dayNightCycler.f_amplitude = 20.f;
+	f_skyPanning = 0.f;
 
 }
 
@@ -383,9 +460,13 @@ void SceneShadow::Update(double dt)
 	lights[0].position.Set(m_dayNightCycler.v_sunPos.x, m_dayNightCycler.v_sunPos.y, m_dayNightCycler.v_sunPos.z);
 
 	lights[0].color.Set(1.f, 0.5f * lights[0].power + 0.5f, lights[0].power);
-
 	glUniform3fv(m_parameters[U_LIGHT0_COLOR], 1, &lights[0].color.r);
+	f_dayDistribution = lights[0].power;
+	glUniform1f(m_parameters[U_TEXTURE_DAYDISTRIBUTION], f_dayDistribution);
+	f_nightDistribution = 1.f - lights[0].power;
+	glUniform1f(m_parameters[U_TEXTURE_NIGHTDISTRIBUTION], f_nightDistribution);
 
+	cout << f_dayDistribution << ',' << f_nightDistribution << ',' << f_dayDistribution + f_nightDistribution << '\n';
 
 	if (Application::IsKeyPressed('Z'))
 	{
@@ -397,6 +478,12 @@ void SceneShadow::Update(double dt)
 		m_dayNightCycler.f_cycleSpeed += dt;
 
 	}
+
+	f_skyPanning += dt;// *0.01f;
+	if (f_skyPanning > 1.0f)
+		f_skyPanning -= 1.f;
+	glUniform1f(m_parameters[U_TEXTURE_SKYPANVALUE], f_skyPanning);
+
 }
 
 void SceneShadow::RenderText(Mesh* mesh, std::string text, Color color)
@@ -630,7 +717,6 @@ void SceneShadow::RenderParticle(ParticleObject * particle)
 void SceneShadow::RenderTerrain()
 {
 	modelStack.PushMatrix();
-	modelStack.Translate(0, 0, 0);
 	modelStack.Scale(4000.0f, 350.f, 4000.0f);
 	RenderMesh(meshList[GEO_TERRAIN], true);
 	modelStack.PopMatrix();
@@ -744,6 +830,26 @@ void SceneShadow::RenderPassMain()
 		Position lightPosition_cameraspace = viewStack.Top() * lights[0].position;
 		glUniform3fv(m_parameters[U_LIGHT0_POSITION], 1, &lightPosition_cameraspace.x);
 	}
+
+	if (lights[1].type == Light::LIGHT_DIRECTIONAL)
+	{
+		Vector3 lightDir(lights[1].position.x, lights[1].position.y, lights[1].position.z);
+		Vector3 lightDirection_cameraspace = viewStack.Top() * lightDir;
+		glUniform3fv(m_parameters[U_LIGHT1_POSITION], 1, &lightDirection_cameraspace.x);
+	}
+	else if (lights[1].type == Light::LIGHT_SPOT)
+	{
+		Position lightPosition_cameraspace = viewStack.Top() * lights[1].position;
+		glUniform3fv(m_parameters[U_LIGHT1_POSITION], 1, &lightPosition_cameraspace.x);
+		Vector3 spotDirection_cameraspace = viewStack.Top() * lights[1].spotDirection;
+		glUniform3fv(m_parameters[U_LIGHT1_SPOTDIRECTION], 1, &spotDirection_cameraspace.x);
+	}
+	else
+	{
+		Position lightPosition_cameraspace = viewStack.Top() * lights[1].position;
+		glUniform3fv(m_parameters[U_LIGHT1_POSITION], 1, &lightPosition_cameraspace.x);
+	}
+
 	RenderMesh(meshList[GEO_AXES], false);
 
 	RenderWorld(); // Sphere cube plane
@@ -827,6 +933,7 @@ void SceneShadow::RenderGO(GameObject *go)
 	switch (go->e_goType)
 	{
 	case GEO_TREE:
+	case GEO_CAMPFIRE:
 		modelStack.PushMatrix();
 		modelStack.Translate(go->v_pos.x, go->v_pos.y, go->v_pos.z);
 		modelStack.Rotate(go->v_dir.x, 1, 0, 0);
@@ -836,7 +943,13 @@ void SceneShadow::RenderGO(GameObject *go)
 		RenderMesh(meshList[go->e_goType], true);
 		modelStack.PopMatrix();
 		break;
-
+	case GEO_FIRE:
+		modelStack.PushMatrix();
+		modelStack.Translate(go->v_pos.x, go->v_pos.y, go->v_pos.z);
+		modelStack.Rotate(Math::RadianToDegree(atan2(camera.position.x - go->v_pos.x, camera.position.z - go->v_pos.z)), 0, 1, 0);
+		modelStack.Scale(go->v_scale.x, go->v_scale.y, go->v_scale.z);
+		RenderMesh(meshList[go->e_goType], false);
+		modelStack.PopMatrix();
 	default:
 		break;
 	};
@@ -844,11 +957,17 @@ void SceneShadow::RenderGO(GameObject *go)
 
 void SceneShadow::RenderSkyPlane()
 {
+	glUniform1i(m_parameters[U_TEXTURE_ISSKY], 1);
+	glUniform1i(m_parameters[U_TEXTURE_SKYPAN], 0);
+
 	modelStack.PushMatrix();
 	modelStack.Translate(0, 2100, 0);
-	modelStack.Rotate(rotateAngle, 0, 1, 0);
+	//modelStack.Rotate(rotateAngle, 0, 1, 0);
 	RenderMesh(meshList[GEO_SKYPLANE], false);
 	modelStack.PopMatrix();
+	glUniform1i(m_parameters[U_TEXTURE_ISSKY], 0);
+	glUniform1i(m_parameters[U_TEXTURE_SKYPAN], 0);
+
 }
 void SceneShadow::Render()
 {
@@ -1089,7 +1208,7 @@ void SceneShadow::UpdateParticles(double dt)
 		particle->v_vel.Set(1, 1, 1);
 		particle->rotationspeed = Math::RandFloatMinMax(20.f, 40.f);
 		particle->v_pos.Set(Math::RandFloatMinMax(-1700, 1700), 750.f, Math::RandFloatMinMax(-1700, 1700));
-		cout << "particle is at " << particle->v_pos << '\n';
+//		cout << "particle is at " << particle->v_pos << '\n';
 
 	}
 
