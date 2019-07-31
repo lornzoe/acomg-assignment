@@ -33,7 +33,7 @@ public:
 	//bool b_isCollidable;
 	// also maybe insert in future: collision comoponent pointer.
 
-	GameObject(GEOMETRY_TYPE typeValue);
+	GameObject(GEOMETRY_TYPE typeValue = GEO_SAMPLEOBJ);
 	~GameObject();
 
 	static Vector3 s_v_gravity;
