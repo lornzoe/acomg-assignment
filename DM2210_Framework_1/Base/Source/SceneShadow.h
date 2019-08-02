@@ -195,6 +195,10 @@ private:
 	float f_dayDistribution;
 	float f_nightDistribution;
 	float f_skyPanning;
+
+	float f_debugValue;
+	float f_debugValue2;
+	Vector3 v_debugValue3;
 };
 
 #endif //scene_shadow

@@ -357,6 +357,9 @@ void SceneShadow::Init()
 	m_dayNightCycler.f_cycleSpeed = 10.f;
 	f_skyPanning = 0.f;
 
+	f_debugValue = 0.f;
+	f_debugValue2 = 0.f;
+
 }
 
 void SceneShadow::Update(double dt)
@@ -939,7 +942,6 @@ RenderTextOnScreen(meshList[GEO_TEXT], ss1.str(), Color(0, 1, 0), 3, 0, 3);
 
 std::ostringstream ss2;
 ss2.precision(4);
-
 ss2 << "Power[0]: " << lights[0].power;
 RenderTextOnScreen(meshList[GEO_TEXT], ss2.str(), Color(0, 1, 0), 3, 0, 0);
 
@@ -948,6 +950,20 @@ ss3.precision(4);
 ss3 << "Time: " << m_dayNightCycler.f_hour << ", Speed: " << m_dayNightCycler.f_cycleSpeed;
 RenderTextOnScreen(meshList[GEO_TEXT], ss3.str(), Color(0, 1, 0), 3, 0, 9);
 
+std::ostringstream ss4;
+ss4.precision(4);
+ss4 << "debugValue:" << f_debugValue;
+RenderTextOnScreen(meshList[GEO_TEXT], ss4.str(), Color(0, 1, 0), 3, 0, 12);
+
+std::ostringstream ss5;
+ss5.precision(4);
+ss5 << "debugValue2:" << f_debugValue2;
+RenderTextOnScreen(meshList[GEO_TEXT], ss5.str(), Color(0, 1, 0), 3, 0, 15);
+
+std::ostringstream ss6;
+ss6.precision(4);
+ss6 << "value3:" << v_debugValue3;
+RenderTextOnScreen(meshList[GEO_TEXT], ss6.str(), Color(0, 1, 0), 3, 0, 18);
 }
 
 void SceneShadow::RenderGO(GameObject *go)
@@ -1251,7 +1267,7 @@ void SceneShadow::UpdateParticles(double dt)
 				particle->v_pos += particle->v_vel * (float)dt * 10.f;
 				particle->rotation += particle->rotationspeed* float(dt);
 
-				if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z))
+				if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x / 4000, particle->v_pos.z / 4000))
 				{
 					particle->b_active = false;
 					i_particleCount--;
@@ -1260,31 +1276,49 @@ void SceneShadow::UpdateParticles(double dt)
 
 			if (particle->e_goType == GEO_PARTICLE_LEAF)
 			{
-
-				particle->f_timeElapsed += (float)dt;
-				if (particle->f_timeElapsed > Math::TWO_PI)
+				if (particle->v_pos.y - 5.f < ReadHeightMap(m_heightMap, particle->v_pos.x / 4000, particle->v_pos.z / 4000) * 350.f)
 				{
-					// since the death condition is when leaf touches ground, we'll hijack the lifespan to hold values for us
-					particle->f_timeElapsed -= Math::TWO_PI;
-					particle->f_lifespan = rand() % 10 - 5;
-					particle->rotation *= -1;
+					particle->f_lifespan -= (float)dt;
+
+					if (particle->f_lifespan < 0.f)
+					{
+						particle->b_active = false;
+						i_particleCount--;
+						//cout << "leaf particle deactivated, particlecount left: " << i_particleCount << '\n';
+					}
+					else
+						particle->v_scale.Set(particle->f_lifespan * 0.2f, particle->f_lifespan * 0.2f, particle->f_lifespan * 0.2f);
+
 				}
-
-				particle->v_vel.x = sin(particle->f_timeElapsed) * particle->f_lifespan;
-				particle->v_vel.z = cos(particle->f_timeElapsed) * particle->f_lifespan;
-
-
-				particle->v_vel.y += GameObject::s_v_gravity.y * 0.5f * (float)dt;
-				particle->v_pos += particle->v_vel * (float)dt * 10.f;
-				particle->rotation += particle->rotationspeed* float(dt);
-
-				if (particle->v_pos.y < ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z) * 350.f)
+				else
 				{
-					particle->b_active = false;
-					i_particleCount--;
-					cout << "leaf particle deactivated, particlecount left: " << i_particleCount << '\n';
-				}
+					particle->f_timeElapsed += (float)dt;
+					if (particle->f_timeElapsed > Math::TWO_PI)
+					{
+						// since the death condition is when leaf touches ground, we'll hijack the lifespan to hold values for us
+						particle->f_timeElapsed -= Math::TWO_PI;
+						particle->f_lifespan = rand() % 10 - 5;
+						particle->rotation *= -1;
+					}
 
+					particle->v_vel.x = sin(particle->f_timeElapsed) * particle->f_lifespan;
+					particle->v_vel.z = cos(particle->f_timeElapsed) * particle->f_lifespan;
+
+
+					particle->v_vel.y += GameObject::s_v_gravity.y * 0.25f * (float)dt;
+					particle->v_pos += particle->v_vel * (float)dt * 10.f;
+					particle->rotation += particle->rotationspeed* float(dt);
+
+					//f_debugValue = ReadHeightMap(m_heightMap, particle->v_pos.x / 4000, particle->v_pos.z / 4000) * 350.f;
+					if (particle->v_pos.y - 5.f < ReadHeightMap(m_heightMap, particle->v_pos.x / 4000, particle->v_pos.z / 4000 * 350.f))
+					{
+						// one-time trigger
+						//cout << "leaf particle landed, starting to die at y: "<< (float)ReadHeightMap(m_heightMap, particle->v_pos.x, particle->v_pos.z) * 350.f << '\n';
+
+						particle->f_lifespan = 5.f;
+						particle->v_vel.Set(0.f, 0.f, 0.f);
+					}
+				}
 			}
 
 			if (particle->e_goType == GEO_PARTICLE_SMOKE)
@@ -1366,6 +1400,9 @@ void SceneShadow::UpdateGO(double dt)
 			particle->v_pos.x = go->v_pos.x + Math::RandFloatMinMax(-100.f, 100.f);
 			particle->v_pos.z = go->v_pos.z + Math::RandFloatMinMax(-100.f, 100.f);
 			particle->v_pos.y = go->v_pos.y + 6.f * go->v_scale.y;
+
+			//v_debugValue3 = particle->v_pos;
+			//f_debugValue2 = ReadHeightMap(m_heightMap, particle->v_pos.x / 4000, particle->v_pos.z);
 
 			particle->v_scale.Set(1.f, 1.f, 1.f);
 
