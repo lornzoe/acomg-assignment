@@ -158,7 +158,7 @@ private:
 	unsigned m_programID;
 	unsigned m_parameters[U_TOTAL];
 
-	Camera3 camera;
+	CameraAssignment camera;
 	float rotateAngle;
 
 	MS modelStack;
@@ -180,7 +180,6 @@ private:
 	float fogStart, fogEnd;
 
 	std::vector<GameObject *> m_goList;
-
 	std::vector<ParticleObject *> m_poList;
 	int i_objectCount;
 	int i_particleCount;
@@ -196,6 +195,10 @@ private:
 	float f_dayDistribution;
 	float f_nightDistribution;
 	float f_skyPanning;
+
+	float f_debugValue;
+	float f_debugValue2;
+	Vector3 v_debugValue3;
 };
 
 #endif //scene_shadow
